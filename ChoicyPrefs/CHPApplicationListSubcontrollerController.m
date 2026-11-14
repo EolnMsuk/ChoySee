@@ -58,6 +58,17 @@
 	[self reloadSpecifiers];
 }
 
+- (BOOL)choicy_shouldPrioritizeApplicationWithIdentifier:(NSString *)applicationID
+{
+	if (![applicationID isKindOfClass:[NSString class]] || !applicationID.length) return NO;
+	if (processPreferencesAreConfigured(processPreferencesForApplication(preferences, applicationID), preferences)) return YES;
+	// List ordering includes active plugin overrides; icon tagging keeps its own predicate.
+	for (NSString *pluginID in choicyPluginIdentifiersForApplication(applicationID)) {
+		if (processPreferencesAreConfigured(processPreferencesForApplication(preferences, pluginID), preferences)) return YES;
+	}
+	return NO;
+}
+
 - (NSMutableArray *)specifiers
 {
 	BOOL needsOrdering = !_specifiers;
@@ -82,7 +93,7 @@
 			if ([seen containsObject:applicationID]) continue;
 			[seen addObject:applicationID];
 		}
-		if (applicationPreferencesAreConfigured(preferences, applicationID)) {
+		if ([self choicy_shouldPrioritizeApplicationWithIdentifier:applicationID]) {
 			[configured addObject:specifier];
 		}
 		else {
