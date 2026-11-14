@@ -32,7 +32,9 @@
 	PSSpecifier *_segmentSpecifier;
 	NSMutableArray *_allowedTweaks;
 	NSMutableArray *_deniedTweaks;
-	NSInteger _customTweakConfigurationSection;
+	NSSet<NSString *> *_globalDeniedTweaks;
+	BOOL _writingPreferences;
+	BOOL _preferencesRefreshScheduled;
 }
 @property (nonatomic) NSMutableDictionary *processPreferences;
 + (NSString *)executablePathForBundleProxy:(LSBundleProxy *)bundleProxy;

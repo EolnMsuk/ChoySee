@@ -103,7 +103,8 @@
 			<key>PostNotification</key>
 			<string>com.opa334.choicyprefs/ReloadPrefs</string>
 			<key>default</key>
-			<true/>
+			<!-- CHPRootListController supplies the shared iOS-dependent default. -->
+			<false/>
 			<key>key</key>
 			<string>tagCustomAppsEnabled</string>
 			<key>label</key>
@@ -115,7 +116,8 @@
 			<key>PostNotification</key>
 			<string>com.opa334.choicyprefs/ReloadPrefs</string>
 			<key>default</key>
-			<true/>
+			<!-- CHPRootListController supplies the shared iOS-dependent default. -->
+			<false/>
 			<key>key</key>
 			<string>openInChoicyOptionEnabled</string>
 			<key>label</key>

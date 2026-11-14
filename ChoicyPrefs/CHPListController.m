@@ -41,21 +41,16 @@
 
 + (NSString *)previewStringForProcessPreferences:(NSDictionary *)processPreferences
 {
-	NSNumber *tweakInjectionDisabledNum = processPreferences[kChoicyProcessPrefsKeyTweakInjectionDisabled];
-	NSNumber *customTweakConfigurationEnabledNum = processPreferences[kChoicyProcessPrefsKeyCustomTweakConfigurationEnabled];
-	NSNumber *overwriteGlobalTweakConfigurationNum = processPreferences[kChoicyProcessPrefsKeyOverwriteGlobalTweakConfiguration];
+	if (![processPreferences isKindOfClass:[NSDictionary class]]) return @"";
 
-	if (tweakInjectionDisabledNum.boolValue) {
+	if (parseNumberBool(processPreferences[kChoicyProcessPrefsKeyTweakInjectionDisabled], NO)) {
 		return localize(@"TWEAKS_DISABLED");
 	}
-	else if (customTweakConfigurationEnabledNum.boolValue) {
+	else if (parseNumberBool(processPreferences[kChoicyProcessPrefsKeyCustomTweakConfigurationEnabled], NO)) {
 		return localize(@"CUSTOM");
 	}
-	else if (overwriteGlobalTweakConfigurationNum.boolValue) {
-		NSArray *globalDeniedTweaks = preferences[kChoicyPrefsKeyGlobalDeniedTweaks];
-		if (globalDeniedTweaks.count) {
-			return localize(@"GLOBAL_OVERWRITE");
-		}
+	else if (processPreferencesAreConfigured(processPreferences, preferences)) {
+		return localize(@"GLOBAL_OVERWRITE");
 	}
 	return @"";
 }

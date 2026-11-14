@@ -46,6 +46,7 @@ void choicy_reloadPreferences()
 	BOOL changed = ![preferences isEqualToDictionary:updated];
 	preferences = updated;
 	if (changed) {
+		choicyInvalidateApplicationPluginCache();
 		[[NSNotificationCenter defaultCenter] postNotificationName:kChoicyPreferencesDidReloadNotification object:nil];
 	}
 }
@@ -152,6 +153,31 @@ static void choicyOpenRequestReceived(CFNotificationCenterRef center, void *obse
 }
 
 @implementation CHPRootListController
+
+- (NSMutableArray *)specifiers
+{
+	BOOL needsDefaults = !_specifiers;
+	NSMutableArray *specifiers = [super specifiers];
+	if (needsDefaults) {
+		for (PSSpecifier *specifier in specifiers) {
+			NSString *key = [specifier propertyForKey:@"key"];
+			if ([key isEqualToString:kChoicyPrefsKeyTagCustomAppsEnabled] || [key isEqualToString:kChoicyPrefsKeyOpenInChoicyOptionEnabled]) {
+				[specifier setProperty:@(choicyAppOptionsDefaultEnabled()) forKey:@"default"];
+			}
+		}
+	}
+	return specifiers;
+}
+
+- (id)readPreferenceValue:(PSSpecifier *)specifier
+{
+	NSString *key = [specifier propertyForKey:@"key"];
+	if ([key isEqualToString:kChoicyPrefsKeyTagCustomAppsEnabled] || [key isEqualToString:kChoicyPrefsKeyOpenInChoicyOptionEnabled]) {
+		NSDictionary *snapshot = [NSDictionary dictionaryWithContentsOfFile:kChoicyPrefsPlistPath];
+		return @(parseNumberBool(snapshot[key], choicyAppOptionsDefaultEnabled()));
+	}
+	return [super readPreferenceValue:specifier];
+}
 
 - (void)dealloc
 {

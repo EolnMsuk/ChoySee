@@ -94,11 +94,150 @@ NSDictionary *processPreferencesForDaemon(NSDictionary *preferences, NSString *d
 	return [processPreferences isKindOfClass:[NSDictionary class]] ? processPreferences : nil;
 }
 
-BOOL processPreferencesAreConfigured(NSDictionary *processPreferences)
+BOOL choicyAppOptionsDefaultEnabled(void)
+{
+	return kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_15_0;
+}
+
+NSSet<NSString *> *choicyGlobalDeniedTweaks(NSDictionary *preferences)
+{
+	id deniedTweaks = [preferences isKindOfClass:[NSDictionary class]] ? preferences[kChoicyPrefsKeyGlobalDeniedTweaks] : nil;
+	NSMutableSet *names = [NSMutableSet new];
+	if ([deniedTweaks isKindOfClass:[NSArray class]]) {
+		for (id name in deniedTweaks) {
+			if ([name isKindOfClass:[NSString class]] && [name length]) [names addObject:name];
+		}
+	}
+	return [names copy];
+}
+
+BOOL processPreferencesHaveCustomRules(NSDictionary *processPreferences)
 {
 	if (![processPreferences isKindOfClass:[NSDictionary class]]) return NO;
 	return parseNumberBool(processPreferences[kChoicyProcessPrefsKeyTweakInjectionDisabled], NO)
 		|| parseNumberBool(processPreferences[kChoicyProcessPrefsKeyCustomTweakConfigurationEnabled], NO);
+}
+
+BOOL processPreferencesAreConfigured(NSDictionary *processPreferences, NSDictionary *preferences)
+{
+	if (![processPreferences isKindOfClass:[NSDictionary class]]) return NO;
+	return processPreferencesHaveCustomRules(processPreferences)
+		|| (parseNumberBool(processPreferences[kChoicyProcessPrefsKeyOverwriteGlobalTweakConfiguration], NO)
+			&& choicyGlobalDeniedTweaks(preferences).count > 0);
+}
+
+// Resolve optional LaunchServices interfaces at runtime. Shared.m also runs in
+// runningboardd, where none of this presentation-only discovery is initialized.
+@protocol ChoicyApplicationProxy <NSObject>
++ (instancetype)applicationProxyForIdentifier:(NSString *)identifier;
+- (NSArray *)plugInKitPlugins;
+- (NSArray *)VPNPlugins;
+@end
+
+@protocol ChoicyPluginProxy <NSObject>
+- (NSString *)bundleIdentifier;
+@end
+
+@protocol ChoicyApplicationWorkspace <NSObject>
++ (instancetype)defaultWorkspace;
+- (void)addObserver:(id)observer;
+- (void)removeObserver:(id)observer;
+@end
+
+static NSMutableDictionary<NSString *, NSSet<NSString *> *> *choicyApplicationPluginIdentifiers;
+
+void choicyInvalidateApplicationPluginCache(void)
+{
+	[choicyApplicationPluginIdentifiers removeAllObjects];
+}
+
+void choicyInvalidateApplicationPluginCacheForApplication(NSString *applicationID)
+{
+	if ([applicationID isKindOfClass:[NSString class]] && applicationID.length) {
+		[choicyApplicationPluginIdentifiers removeObjectForKey:applicationID];
+	}
+}
+
+@interface ChoicyApplicationPluginObserver : NSObject
+@property (nonatomic, strong) id<ChoicyApplicationWorkspace> workspace;
+@end
+
+@implementation ChoicyApplicationPluginObserver
+
+- (instancetype)init
+{
+	self = [super init];
+	if (self) {
+		Class<ChoicyApplicationWorkspace> workspaceClass = NSClassFromString(@"LSApplicationWorkspace");
+		if ([workspaceClass respondsToSelector:@selector(defaultWorkspace)]) {
+			id<ChoicyApplicationWorkspace> workspace = [workspaceClass defaultWorkspace];
+			if ([workspace respondsToSelector:@selector(addObserver:)] && [workspace respondsToSelector:@selector(removeObserver:)]) {
+				_workspace = workspace;
+				[workspace addObserver:self];
+			}
+		}
+	}
+	return self;
+}
+
+- (void)dealloc
+{
+	[_workspace removeObserver:self];
+}
+
+- (void)pluginsDidChange
+{
+	// Workspace callbacks may arrive off the main thread. Invalidate before the
+	// UI notification, so both list ordering and visible dots see fresh ownership.
+	dispatch_async(dispatch_get_main_queue(), ^{
+		choicyInvalidateApplicationPluginCache();
+		[[NSNotificationCenter defaultCenter] postNotificationName:kChoicyApplicationPluginsDidChangeNotification object:nil];
+	});
+}
+
+- (void)applicationsDidInstall:(NSArray *)applications { [self pluginsDidChange]; }
+- (void)applicationsDidUninstall:(NSArray *)applications { [self pluginsDidChange]; }
+- (void)pluginsDidInstall:(NSArray *)plugins { [self pluginsDidChange]; }
+- (void)pluginsDidUninstall:(NSArray *)plugins { [self pluginsDidChange]; }
+
+@end
+
+static NSSet<NSString *> *choicyPluginIdentifiersForApplication(NSString *applicationID)
+{
+	static ChoicyApplicationPluginObserver *observer;
+	if (!observer) observer = [ChoicyApplicationPluginObserver new];
+	if (!choicyApplicationPluginIdentifiers) choicyApplicationPluginIdentifiers = [NSMutableDictionary new];
+	NSSet *cached = choicyApplicationPluginIdentifiers[applicationID];
+	if (cached) return cached;
+
+	NSMutableSet *identifiers = [NSMutableSet new];
+	Class<ChoicyApplicationProxy> proxyClass = NSClassFromString(@"LSApplicationProxy");
+	if ([proxyClass respondsToSelector:@selector(applicationProxyForIdentifier:)]) {
+		id<ChoicyApplicationProxy> proxy = [proxyClass applicationProxyForIdentifier:applicationID];
+		NSArray *plugInKitPlugins = [proxy respondsToSelector:@selector(plugInKitPlugins)] ? [proxy plugInKitPlugins] : nil;
+		NSArray *VPNPlugins = [proxy respondsToSelector:@selector(VPNPlugins)] ? [proxy VPNPlugins] : nil;
+		for (id collection in @[plugInKitPlugins ?: @[], VPNPlugins ?: @[]]) {
+			if (![collection isKindOfClass:[NSArray class]] && ![collection isKindOfClass:[NSSet class]]) continue;
+			for (id<ChoicyPluginProxy> plugin in collection) {
+				if (![plugin respondsToSelector:@selector(bundleIdentifier)]) continue;
+				NSString *identifier = [plugin bundleIdentifier];
+				if ([identifier isKindOfClass:[NSString class]] && identifier.length) [identifiers addObject:identifier];
+			}
+		}
+	}
+	NSSet *result = [identifiers copy];
+	choicyApplicationPluginIdentifiers[applicationID] = result;
+	return result;
+}
+
+BOOL applicationPreferencesAreConfigured(NSDictionary *preferences, NSString *applicationID)
+{
+	if (![applicationID isKindOfClass:[NSString class]] || !applicationID.length) return NO;
+	if (processPreferencesAreConfigured(processPreferencesForApplication(preferences, applicationID), preferences)) return YES;
+	for (NSString *pluginID in choicyPluginIdentifiersForApplication(applicationID)) {
+		if (processPreferencesHaveCustomRules(processPreferencesForApplication(preferences, pluginID))) return YES;
+	}
+	return NO;
 }
 
 static NSString *const kChoicyOpenRequestStaged = @"staged";

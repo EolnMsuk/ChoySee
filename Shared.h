@@ -27,7 +27,14 @@ extern NSBundle *CHBundle;
 extern NSString *localize(NSString *key);
 extern NSDictionary *processPreferencesForApplication(NSDictionary *preferences, NSString *applicationID);
 extern NSDictionary *processPreferencesForDaemon(NSDictionary *preferences, NSString *daemonDisplayName);
-extern BOOL processPreferencesAreConfigured(NSDictionary *processPreferences);
+extern BOOL choicyAppOptionsDefaultEnabled(void);
+extern NSSet<NSString *> *choicyGlobalDeniedTweaks(NSDictionary *preferences);
+extern BOOL processPreferencesHaveCustomRules(NSDictionary *processPreferences);
+extern BOOL processPreferencesAreConfigured(NSDictionary *processPreferences, NSDictionary *preferences);
+// Presentation helpers: call on the main thread, never from the launch/environment path.
+extern BOOL applicationPreferencesAreConfigured(NSDictionary *preferences, NSString *applicationID);
+extern void choicyInvalidateApplicationPluginCache(void);
+extern void choicyInvalidateApplicationPluginCacheForApplication(NSString *applicationID);
 
 // This one-shot navigation request is separate from injection preferences.
 extern NSString *choicyStageApplicationSettingsRequest(NSString *applicationID);
@@ -44,6 +51,7 @@ extern NSInteger parseNumberInteger(id number, NSInteger default_);
 #define kChoicyOpenRequestNotification CFSTR("com.opa334.choicy/OpenApplicationSettingsV2")
 #define kChoicyOpenRequestLifetime 15.0
 #define kChoicyPreferencesDidReloadNotification @"ChoicyPreferencesDidReload"
+#define kChoicyApplicationPluginsDidChangeNotification @"ChoicyApplicationPluginsDidChange"
 #define kChoicyPreferencesRootID @"ChoicyPrefs"
 #define kChoicyApplicationsSpecifierID @"Applications"
 #define kChoicyDylibName @"   Choicy"

@@ -48,6 +48,7 @@ void choicy_reloadPreferences(void)
 			}
 		}
 		// Also runs on first write and reset, and when only the visual switch changes.
+		choicyInvalidateApplicationPluginCache();
 		choicy_refreshIconTags();
 	}
 }

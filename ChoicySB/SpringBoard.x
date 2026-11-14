@@ -61,8 +61,8 @@ static void choicyUpdateIconTag(SBIconView *view)
 	UIView *tag = objc_getAssociatedObject(view, &choicyIconTagKey);
 	NSString *applicationID = choicyApplicationIDForIconView(view);
 	BOOL show = view.window && applicationID.length
-		&& parseNumberBool(preferences[kChoicyPrefsKeyTagCustomAppsEnabled], YES)
-		&& processPreferencesAreConfigured(processPreferencesForApplication(preferences, applicationID));
+		&& parseNumberBool(preferences[kChoicyPrefsKeyTagCustomAppsEnabled], choicyAppOptionsDefaultEnabled())
+		&& applicationPreferencesAreConfigured(preferences, applicationID);
 	UIView *imageView = nil;
 	if (show && [view respondsToSelector:@selector(iconImageView)]) imageView = [view iconImageView];
 	if (show && !imageView && [view respondsToSelector:@selector(_iconImageView)]) imageView = [view _iconImageView];
@@ -175,7 +175,7 @@ static NSArray *choicyShortcutItems(NSArray *original, NSString *applicationID, 
 		if (![item.type isEqualToString:kChoicyLaunchShortcutType] && ![item.type isEqualToString:kChoicyOpenShortcutType]) [items addObject:item];
 	}
 	if (!applicationID.length) return items;
-	if (parseNumberBool(preferences[kChoicyPrefsKeyOpenInChoicyOptionEnabled], YES)) {
+	if (parseNumberBool(preferences[kChoicyPrefsKeyOpenInChoicyOptionEnabled], choicyAppOptionsDefaultEnabled())) {
 		SBSApplicationShortcutItem *open = [[NSClassFromString(@"SBSApplicationShortcutItem") alloc] init];
 		open.type = kChoicyOpenShortcutType;
 		open.localizedTitle = localize(@"OPEN_IN_CHOICY");
@@ -206,6 +206,7 @@ static NSArray *choicyShortcutItems(NSArray *original, NSString *applicationID, 
 {
 	[objc_getAssociatedObject(self, &choicyIconTagKey) removeFromSuperview];
 	%orig;
+	choicyInvalidateApplicationPluginCacheForApplication(choicyApplicationIDForIconView(self));
 	choicyUpdateIconTag(self);
 }
 
@@ -390,6 +391,13 @@ void choicy_initSpringBoard(void)
 	%init();
 	choicyVisibleIconViews = [NSHashTable weakObjectsHashTable];
 	%init(IconTags);
+	[[NSNotificationCenter defaultCenter] addObserverForName:kChoicyApplicationPluginsDidChangeNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *notification) {
+		choicy_refreshIconTags();
+	}];
+	[[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidBecomeActiveNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *notification) {
+		choicyInvalidateApplicationPluginCache();
+		choicy_refreshIconTags();
+	}];
 
 	CHBundle = [NSBundle bundleWithPath:JBROOT_PATH_NSSTRING(@"/Library/Application Support/Choicy.bundle")];
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, respring, CFSTR("com.opa334.choicy/respring"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);

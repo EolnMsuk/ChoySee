@@ -145,7 +145,7 @@
 					NSDictionary *processPreferences = applicationID
 						? processPreferencesForApplication(preferences, applicationID)
 						: processPreferencesForDaemon(preferences, executablePath.lastPathComponent);
-					[(processPreferencesAreConfigured(processPreferences) ? configured : ordinary) addObject:specifier];
+					[(processPreferencesAreConfigured(processPreferences, preferences) ? configured : ordinary) addObject:specifier];
 				}
 			}
 			[_specifiers addObjectsFromArray:configured];

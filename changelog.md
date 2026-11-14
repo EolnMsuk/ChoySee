@@ -1,3 +1,14 @@
+# v1.5.5~b4
+
+- Tag Custom Apps and the "Choicy Settings" Option now default to on on iOS 15 and later, and off on earlier iOS versions. This applies to fresh installs, missing settings, and Reset Preferences. Saved on/off choices are retained when updating. Both one-time launch options still default to off.
+- Apps and daemons that override disabled global tweaks now appear first in their lists. These apps also receive the grey icon dot when Tag Custom Apps is enabled. An override alone does not mark an entry as configured when no tweaks are disabled globally.
+- Tweaks disabled globally are hidden from an app, daemon, or App Plugin's Custom Tweak Configuration unless that process has Overwrite Global Tweak Configuration enabled. Each plugin follows its own override switch. Hidden Allow and Deny selections are kept and reappear when eligible.
+- An app also appears first and receives the grey icon dot when one of its installed App Plugins has Custom Tweak Configuration or Disable Tweak Injection enabled. Both PlugInKit and VPN plugins are included. The dot requires Tag Custom Apps to be enabled; plugin rules do not change the parent's injection settings.
+- Renamed "Open in Choicy" to "Choicy Settings" in App Options and the Home Screen menu. The App Options description now explains that this opens the selected app's Choicy configuration, alongside the one-time launch options.
+- **Keep your existing Choicy preference file (plist).** No deletion, reset, or new migration is required. Saved app, daemon, plugin, and global rules remain compatible. Reset Preferences is only needed if you want to clear your settings and restore the defaults for your iOS version.
+
+The package version and current artifact names are now `1.5.5~b4`. Local validation covers source and metadata only; compilation, package inspection, and device acceptance remain owner checks. Existing b3 packages and the history below are unchanged.
+
 # v1.5.5~b3
 
 ## Release notes
@@ -8,7 +19,7 @@
 - The Home Screen menu preserves the order of existing app and system shortcuts and adds one copy of each applicable Choicy entry. Open in Choicy precedes the applicable one-time launch shortcut when enabled. Its navigation waits for menu dismissal, handles cold and warm Settings, and builds the Back path through Applications and Choicy. A newer tap supersedes earlier requests, and one-use requests expire.
 - Preference and list updates use the main thread where needed, with safer observer cleanup and handling of missing app or daemon dictionaries. The new labels and footer text are in English and use the existing localization fallback.
 - The modern workflow builds and labels Rootless, native Roothide, and Rootful packages for iOS 15+. Native Roothide uses its own path and linkage support. Compared with the v1.5.4 build target, modern Rootful starts at iOS 15.0 and ships 64-bit slices.
-- The separate opt-in Legacy Rootful command targets iOS 10.0 with `armv7` and `arm64`, plus old-ABI `arm64e` from iOS 12.0. Its package has its own filename and firmware dependency. The 32-bit pointer scan now visits every slot in the table. Use the modern packages for iOS 15+.
+- The separate opt-in Legacy Rootful command targets iOS 10.0 with `armv7` and `arm64`, plus old-ABI `arm64e` from iOS 12.0. Its package has its own filename and firmware dependency. The 32-bit pointer scan now visits every slot in the table. Use the modern packages for iOS 15+. The v1.5.4 iOS 8.0 build target is outside b3's scope.
 
 ## Expected b3 packages
 
@@ -20,6 +31,8 @@ The modern workflow uses SDK 16.5 and Xcode 16.4. The Legacy Rootful profile use
 | Native Roothide | `>= 15.0` | `arm64 arm64e` | `iphoneos-arm64e` | `Choicy_1.5.5~b3_Roothide.deb` |
 | Rootful | `>= 15.0` | `arm64 arm64e` | `iphoneos-arm` | `Choicy_1.5.5~b3_Rootful.deb` |
 | Legacy Rootful | `>= 10.0` | `armv7 arm64 arm64e` with old arm64e ABI and iOS 12.0 floor on that slice | `iphoneos-arm` | `Choicy_1.5.5~b3_Rootful_Legacy_iOS10.deb` |
+
+Local validation covers source and metadata. Toolchain and dependency compatibility, actual packages, CI runs, and device behavior remain owner acceptance steps. The source directories for LiteHook and ChOma are empty, and the snapshot lacks Git metadata to establish their revisions or revision changes. [Validation and owner handoff](IMPLEMENTATION_NOTES.md)
 
 ## File inventory
 

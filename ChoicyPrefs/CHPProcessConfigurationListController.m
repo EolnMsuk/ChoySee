@@ -113,12 +113,39 @@
 - (void)viewDidLoad
 {
 	[super viewDidLoad];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(choicy_preferencesDidReload:) name:kChoicyPreferencesDidReloadNotification object:nil];
 
 	if ([_appIdentifier isEqualToString:kSpringboardBundleID]) {
 		self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:localize(@"RESPRING") style:UIBarButtonItemStylePlain target:self action:@selector(respring)];
 	}
 
 	[self updateSwitchesAvailability];
+}
+
+- (void)dealloc
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+	[super viewWillAppear:animated];
+	choicy_reloadPreferences();
+	[self reloadSpecifiers];
+}
+
+- (void)choicy_preferencesDidReload:(NSNotification *)notification
+{
+	// writePreferences() posts synchronously. The local setter owns that update;
+	// external changes are coalesced until the current table operation completes.
+	if (_writingPreferences || _preferencesRefreshScheduled) return;
+	_preferencesRefreshScheduled = YES;
+	__weak typeof(self) weakSelf = self;
+	dispatch_async(dispatch_get_main_queue(), ^{
+		CHPProcessConfigurationListController *controller = weakSelf;
+		if (!controller || !controller->_preferencesRefreshScheduled) return;
+		[controller reloadSpecifiers];
+	});
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -156,6 +183,11 @@
 	CHPTweakList *sharedTweakList = [CHPTweakList sharedInstance];
 
 	if ([kAlwaysInjectGlobal containsObject:tweakInfo.dylibName]) {
+		return NO;
+	}
+
+	if (!parseNumberBool(_processPreferences[kChoicyProcessPrefsKeyOverwriteGlobalTweakConfiguration], NO)
+		&& [_globalDeniedTweaks containsObject:tweakInfo.dylibName]) {
 		return NO;
 	}
 
@@ -275,21 +307,22 @@
 
 		[self readPreferences];
 
-		_allowedTweaks = [[_processPreferences objectForKey:kChoicyProcessPrefsKeyAllowedTweaks] mutableCopy] ?: [NSMutableArray new];
-		_deniedTweaks = [[_processPreferences objectForKey:kChoicyProcessPrefsKeyDeniedTweaks] mutableCopy] ?: [NSMutableArray new];
+		id allowedTweaks = _processPreferences[kChoicyProcessPrefsKeyAllowedTweaks];
+		id deniedTweaks = _processPreferences[kChoicyProcessPrefsKeyDeniedTweaks];
+		_allowedTweaks = [allowedTweaks isKindOfClass:[NSArray class]] ? [allowedTweaks mutableCopy] : [NSMutableArray new];
+		_deniedTweaks = [deniedTweaks isKindOfClass:[NSArray class]] ? [deniedTweaks mutableCopy] : [NSMutableArray new];
+		_globalDeniedTweaks = choicyGlobalDeniedTweaks(preferences);
 
 		_specifiers = [super specifiers];
 
-		NSArray *globalDeniedTweaks = preferences[kChoicyPrefsKeyGlobalDeniedTweaks];
-		if (!globalDeniedTweaks.count) {
+		if (!_globalDeniedTweaks.count) {
 			[_specifiers removeObjectAtIndex:0];
 			[_specifiers removeObjectAtIndex:0];
 		}
 
 		PSSpecifier *customTweakConfigurationSpecifier = [self specifierForID:@"CUSTOM_TWEAK_CONFIGURATION"];
-		[self getGroup:&_customTweakConfigurationSection row:nil ofSpecifier:customTweakConfigurationSpecifier];
 
-		if (((NSNumber *)[self readPreferenceValue:customTweakConfigurationSpecifier]).boolValue) {
+		if (parseNumberBool([self readPreferenceValue:customTweakConfigurationSpecifier], NO)) {
 			[self loadCustomConfigurationSpecifiersIfNeeded];
 			[_specifiers addObjectsFromArray:_customConfigurationSpecifiers];
 		}
@@ -321,6 +354,9 @@
 
 - (void)reloadSpecifiers
 {
+	_preferencesRefreshScheduled = NO;
+	_customConfigurationSpecifiers = nil;
+	_segmentSpecifier = nil;
 	[super reloadSpecifiers];
 	[self updateSwitchesAvailability];
 }
@@ -407,19 +443,15 @@
 
 - (void)performUpdatesIfNeccessaryForChangedValue:(id)value key:(NSString *)key
 {
-	if ([key isEqualToString:kChoicyProcessPrefsKeyCustomTweakConfigurationEnabled]) {
-		NSNumber *num = value;
-
-		if (num.boolValue) {
-			[self loadCustomConfigurationSpecifiersIfNeeded];
-			[self insertContiguousSpecifiers:_customConfigurationSpecifiers atEndOfGroup:_customTweakConfigurationSection animated:YES];
-		}
-		else {
-			[self removeContiguousSpecifiers:_customConfigurationSpecifiers animated:YES];
-		}
+	if ([key isEqualToString:kChoicyProcessPrefsKeyCustomTweakConfigurationEnabled]
+		|| [key isEqualToString:kChoicyProcessPrefsKeyOverwriteGlobalTweakConfiguration]) {
+		// Rebuild from the saved settings, including both Allow and Deny arrays.
+		// Never incrementally reinsert a cached list with an obsolete global filter.
+		[self reloadSpecifiers];
+		return;
 	}
 
-	if ([key isEqualToString:kChoicyProcessPrefsKeyTweakInjectionDisabled] || [key isEqualToString:kChoicyProcessPrefsKeyCustomTweakConfigurationEnabled]) {
+	if ([key isEqualToString:kChoicyProcessPrefsKeyTweakInjectionDisabled]) {
 		[self updateSwitchesAvailability];
 	}
 
@@ -443,7 +475,9 @@
 - (void)writePreferenceValue:(id)value key:(NSString *)key
 {
 	_processPreferences[key] = value;
+	_writingPreferences = YES;
 	[self writePreferences];
+	_writingPreferences = NO;
 }
 
 - (void)setPreferenceValue:(id)value specifier:(PSSpecifier *)specifier
@@ -464,9 +498,10 @@
 
 - (void)readAppDaemonSettingsFromMainPropertyList
 {
-	NSDictionary *appDaemonSettingsDict = [preferences objectForKey:[self dictionaryName]];
-
-	_processPreferences = [[appDaemonSettingsDict objectForKey:[self keyForPreferences]] mutableCopy];
+	NSDictionary *saved = (_appIdentifier || _pluginIdentifier)
+		? processPreferencesForApplication(preferences, [self keyForPreferences])
+		: processPreferencesForDaemon(preferences, [self keyForPreferences]);
+	_processPreferences = [saved mutableCopy];
 	if (!_processPreferences) {
 		_processPreferences = [NSMutableDictionary new];
 	}
@@ -475,7 +510,8 @@
 - (void)writeAppDaemonSettingsToMainPropertyList
 {
 	NSMutableDictionary *mutablePrefs = preferencesForWriting();
-	NSMutableDictionary *appDaemonSettingsDict = [[mutablePrefs objectForKey:[self dictionaryName]] mutableCopy] ?: [NSMutableDictionary new];
+	id saved = mutablePrefs[[self dictionaryName]];
+	NSMutableDictionary *appDaemonSettingsDict = [saved isKindOfClass:[NSDictionary class]] ? [saved mutableCopy] : [NSMutableDictionary new];
 	appDaemonSettingsDict[[self keyForPreferences]] = [_processPreferences copy];
 	mutablePrefs[[self dictionaryName]] = [appDaemonSettingsDict copy];
 	writePreferences(mutablePrefs);

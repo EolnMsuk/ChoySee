@@ -29,6 +29,7 @@
 {
 	[super viewDidLoad];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(choicy_preferencesDidReload:) name:kChoicyPreferencesDidReloadNotification object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(choicy_preferencesDidReload:) name:kChoicyApplicationPluginsDidChangeNotification object:nil];
 }
 
 - (void)dealloc
@@ -38,6 +39,7 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
+	choicyInvalidateApplicationPluginCache();
 	[super viewWillAppear:animated];
 	choicy_reloadPreferences();
 	[self reloadSpecifiers];
@@ -72,7 +74,7 @@
 			if ([seen containsObject:applicationID]) continue;
 			[seen addObject:applicationID];
 		}
-		if (processPreferencesAreConfigured(processPreferencesForApplication(preferences, applicationID))) {
+		if (applicationPreferencesAreConfigured(preferences, applicationID)) {
 			[configured addObject:specifier];
 		}
 		else {
