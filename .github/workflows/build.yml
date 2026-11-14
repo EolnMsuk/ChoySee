@@ -1,4 +1,4 @@
-name: Build Choicy packages
+name: Build modern Choicy packages
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   package:
-    name: ${{ matrix.label }}
+    name: ${{ matrix.label }} (iOS 15+)
     runs-on: macos-15-intel
     timeout-minutes: 60
     strategy:
@@ -26,11 +26,14 @@ jobs:
             theos_ref: 958fea4f779943505b15b93c88bb4db8d97b346d
             package_arch: iphoneos-arm64e
           - label: Rootful
+            # Native modern Rootful uses the default (empty) Theos scheme.
             scheme: ''
             theos_repository: theos/theos
             theos_ref: 8167f59de02fd32cf45b16bfcb1330dfa5c9974c
             package_arch: iphoneos-arm
     env:
+      # These three profiles always use the modern source/toolchain path.
+      CHOICY_LEGACY: '0'
       THEOS: ${{ github.workspace }}/.ci/theos
       THEOS_PACKAGE_SCHEME: ${{ matrix.scheme }}
       BUILD_LABEL: ${{ matrix.label }}
@@ -77,9 +80,17 @@ jobs:
           sparse-checkout: ios/xpc_service/headers/xpc
           persist-credentials: false
 
-      - name: Select the pre-installed Xcode compiler for every scheme
+      - name: Validate the modern profile and select Xcode
         run: |
-          set -euo pipefail
+          set -Eeuo pipefail
+          trap 'build_status=$?; printf "::error::Modern profile setup failed (exit %s): %s\n" "$build_status" "$BASH_COMMAND" >&2; exit "$build_status"' ERR
+          test "$CHOICY_LEGACY" = 0
+          test "$BUILD_TARGET" = iphone:clang:16.5:15.0
+          test "$BUILD_ARCHS" = 'arm64 arm64e'
+          case "$BUILD_LABEL:$THEOS_PACKAGE_SCHEME:$PACKAGE_ARCH" in
+            Rootless:rootless:iphoneos-arm64|Roothide:roothide:iphoneos-arm64e|Rootful::iphoneos-arm) ;;
+            *) printf '::error::Unsupported modern package profile: %s / %s / %s\n' "$BUILD_LABEL" "$THEOS_PACKAGE_SCHEME" "$PACKAGE_ARCH" >&2; exit 1 ;;
+          esac
           test "$(uname -m)" = x86_64
           test -d "$DEVELOPER_DIR"
           xcodebuild -version
@@ -114,44 +125,68 @@ jobs:
             cp "$source_headers/$header" "$THEOS/include/xpc/$header"
           done
 
-      - name: Verify source, SDK, and scheme development files
+      - name: Verify modern build prerequisites
         run: |
-          set -euo pipefail
-          test -s external/litehook/src/litehook.h
-          test -s external/ChOma/src/MachO.h
-          test -s external/ChOma/src/Fat.h
-          test -s external/ChOma/src/Host.h
-          test -n "$(find external/litehook/src -name '*.c' -print -quit)"
-          test -n "$(find external/ChOma/src -name '*.c' -print -quit)"
-          test -s "$THEOS/vendor/include/Preferences/PSListController.h"
-          test -s "$THEOS/vendor/include/libroot/libroot.h"
-          test -s "$THEOS/include/xpc/xpc.h"
-          test -s "$THEOS/vendor/include/launch.h"
-          test -s "$THEOS/sdks/iPhoneOS${BUILD_SDK}.sdk/usr/include/bsm/audit.h"
-          test -d "$THEOS/sdks/iPhoneOS${BUILD_SDK}.sdk/System/Library/Frameworks/UIKit.framework"
-          test -d "$THEOS/sdks/iPhoneOS${BUILD_SDK}.sdk/System/Library/PrivateFrameworks/Preferences.framework"
+          set -Eeuo pipefail
+          trap 'preflight_status=$?; printf "::error::Prerequisite check failed (exit %s): %s\n" "$preflight_status" "$BASH_COMMAND" >&2; exit "$preflight_status"' ERR
+          require_file() {
+            if [[ ! -s "$1" ]]; then
+              printf '::error::Missing or empty modern build prerequisite: %s\n' "$1" >&2
+              exit 1
+            fi
+          }
+          require_directory() {
+            if [[ ! -d "$1" ]]; then
+              printf '::error::Missing modern build directory: %s\n' "$1" >&2
+              exit 1
+            fi
+          }
+          echo "Source dependency entries in this checkout (160000 means a submodule; 040000 means vendored files):"
+          git ls-tree HEAD -- external/litehook external/ChOma
+          for required_file in \
+            external/litehook/src/litehook.h \
+            external/ChOma/src/MachO.h \
+            external/ChOma/src/Fat.h \
+            external/ChOma/src/Host.h \
+            "$THEOS/vendor/include/Preferences/PSListController.h" \
+            "$THEOS/vendor/include/libroot/libroot.h" \
+            "$THEOS/include/xpc/xpc.h" \
+            "$THEOS/vendor/include/launch.h" \
+            "$THEOS/sdks/iPhoneOS${BUILD_SDK}.sdk/usr/include/bsm/audit.h"; do
+            require_file "$required_file"
+          done
+          for source_directory in external/litehook/src external/ChOma/src; do
+            require_directory "$source_directory"
+            source_file=$(find "$source_directory" -type f -name '*.c' -print -quit)
+            if [[ -z "$source_file" ]]; then
+              printf '::error::No C sources found in modern build dependency: %s\n' "$source_directory" >&2
+              exit 1
+            fi
+          done
+          require_directory "$THEOS/sdks/iPhoneOS${BUILD_SDK}.sdk/System/Library/Frameworks/UIKit.framework"
+          require_directory "$THEOS/sdks/iPhoneOS${BUILD_SDK}.sdk/System/Library/PrivateFrameworks/Preferences.framework"
           test -x "${PREFIX}clang"
           command -v ldid
           command -v dpkg-deb
           command -v make
           case "$THEOS_PACKAGE_SCHEME" in
             rootless)
-              test -s "$THEOS/vendor/lib/iphone/rootless/libroot.a"
+              require_file "$THEOS/vendor/lib/iphone/rootless/libroot.a"
               ;;
             roothide)
-              test -s "$THEOS/vendor/include/roothide/roothide.h"
-              test -s "$THEOS/vendor/lib/iphone/roothide/libroothide.tbd"
-              test -f "$THEOS/vendor/mod/roothide/package/deb.mk"
+              require_file "$THEOS/vendor/include/roothide/roothide.h"
+              require_file "$THEOS/vendor/lib/iphone/roothide/libroothide.tbd"
+              require_file "$THEOS/vendor/mod/roothide/package/deb.mk"
               ;;
             '')
-              test -s "$THEOS/vendor/lib/libroot.a"
+              require_file "$THEOS/vendor/lib/libroot.a"
               ;;
           esac
 
       - name: Build and install the matching AltList development framework
         run: |
           set -euo pipefail
-          make -C .ci/AltList FINALPACKAGE=1 TARGET="$BUILD_TARGET" ARCHS="$BUILD_ARCHS" THEOS_PACKAGE_SCHEME="$THEOS_PACKAGE_SCHEME"
+          make -C .ci/AltList CHOICY_LEGACY=0 FINALPACKAGE=1 TARGET="$BUILD_TARGET" ARCHS="$BUILD_ARCHS" THEOS_PACKAGE_SCHEME="$THEOS_PACKAGE_SCHEME"
           framework=.ci/AltList/.theos/obj/AltList.framework
           test -s "$framework/AltList"
           test -s "$framework/Headers/ATLApplicationListSubcontrollerController.h"
@@ -165,12 +200,12 @@ jobs:
             grep -F '@loader_path/.jbroot/Library/Frameworks/AltList.framework/AltList' .ci/altlist-install-name.txt
           fi
 
-      - name: Build one clean final package
+      - name: Build one clean modern package
         run: |
           set -euo pipefail
           python3 -c 'from pathlib import Path; assert not list(Path("packages").glob("*.deb")), "Unexpected preexisting packages"'
-          make clean
-          make package FINALPACKAGE=1 TARGET="$BUILD_TARGET" ARCHS="$BUILD_ARCHS" THEOS_PACKAGE_SCHEME="$THEOS_PACKAGE_SCHEME"
+          make clean CHOICY_LEGACY=0 TARGET="$BUILD_TARGET" ARCHS="$BUILD_ARCHS" THEOS_PACKAGE_SCHEME="$THEOS_PACKAGE_SCHEME"
+          make package CHOICY_LEGACY=0 FINALPACKAGE=1 TARGET="$BUILD_TARGET" ARCHS="$BUILD_ARCHS" THEOS_PACKAGE_SCHEME="$THEOS_PACKAGE_SCHEME"
 
       - name: Verify metadata and payload, then label the package
         id: package
