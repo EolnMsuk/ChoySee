@@ -14,7 +14,7 @@
 "OPEN_IN_CHOICY_OPTION" = "\"Choicy Settings\" Option";
 "OPEN_IN_CHOICY" = "Choicy Settings";
 "CONFIGURED" = "Configured";
-"APP_OPTIONS_LAUNCH_AND_ICON_TAG_FOOTER" = "Tag Custom Apps places a small grey dot at the bottom-right of an app's icon when the app has custom tweak injection.\n\nAdds options to the 3D touch / haptic touch menu on apps to launch once with or without tweak injection, or to open the selected app's Choicy configuration using Choicy Settings.\n\nTag Custom Apps and the Choicy Settings option default to on in iOS 15 and later, and off on earlier versions.";
+"APP_OPTIONS_LAUNCH_AND_ICON_TAG_FOOTER" = "Tag Custom Apps places a small grey dot at the bottom-right of an app's icon when the app has custom tweak injection.\n\nAdds options to the 3D touch / haptic touch menu on apps.\n\nTag Custom Apps & Choicy Settings on by default.";
 "APP_OPTIONS_FOOTER" = "Adds an option to the 3D touch / haptic touch menu of applications with the ability to launch the application once without tweaks. If enabled, the option will turn into \"Launch with Tweaks\" when tweak injection has been disabled inside the process configuration of the application.";
 "CUSTOM_TWEAK_CONFIGURATION" = "Custom Tweak Configuration";
 "ALLOW" = "Allow";
