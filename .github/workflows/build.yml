@@ -55,12 +55,13 @@ jobs:
           persist-credentials: false
 
       # Source snapshots may contain .gitmodules without recorded submodule
-      # entries. Keep populated dependencies; otherwise use their default branches.
+      # entries. Keep populated dependencies; otherwise use the original pinned revisions.
       - name: Check out missing LiteHook sources
         if: ${{ hashFiles('external/litehook/src/litehook.h') == '' }}
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: opa334/litehook
+          ref: 0d9d17afc011d2a8dfe67a4f7803ff99143d0f0d
           path: external/litehook
           submodules: recursive
           persist-credentials: false
@@ -70,6 +71,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: opa334/ChOma
+          ref: 2fcc1fc51f6eb778756ccdee3c809bf83a767996
           path: external/ChOma
           submodules: recursive
           persist-credentials: false
