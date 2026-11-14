@@ -2,17 +2,17 @@
 
 A forked (enhanced) version of [Choicy](https://github.com/opa334/Choicy), an advanced tweak configurator!
 
-<img width="4773" height="2589" alt="main" src="https://github.com/user-attachments/assets/7e69dd58-2ce9-4ff0-b353-156e4b6fdefe" />
-
 ## Features
 
 - Disable tweak injection individually for every process
 - Configure each tweak dylib individually for every process
 - Disable tweaks globally (with the ability to set exceptions for individual processes)
 - Option for an application shortcut to launch the application with or without tweaks once
-- **NEW** - Option for an application shortcut to launch injection settings for that app.
-- **NEW** - Option to add grey dot to app icons that have custom / blocked injection. 
+- **NEW** - A Choicy Settings shortcut opens the selected app's tweak configuration.
+- **NEW** - Tag Custom Apps adds a grey dot to apps with custom rules, disabled injection, an active global override, or an App Plugin with custom rules or disabled injection.
 - **NEW** - Auto sorts the application and daemon lists to show configured at the top.
+
+Tag Custom Apps and the Choicy Settings option default to on on iOS 15 and later, and off on earlier versions. Saved choices and the existing preference plist remain compatible when updating to b4; no reset is needed.
 
 ## Install Choicy on iOS 15+
 
@@ -21,10 +21,10 @@ A forked (enhanced) version of [Choicy](https://github.com/opa334/Choicy), an ad
 
 | Environment | Firmware dependency | Filename |
 | --- | --- | --- |
-| GitHub Rootless | `>= 15.0` | `Choicy_1.5.5~b3_Rootless.deb` |
-| GitHub native Roothide | `>= 15.0` | `Choicy_1.5.5~b3_Roothide.deb` |
-| GitHub Rootful | `>= 15.0` | `Choicy_1.5.5~b3_Rootful.deb` |
-| Local Legacy Rootful | `>= 10.0` | `Choicy_1.5.5~b3_Rootful_Legacy_iOS10.deb` |
+| GitHub Rootless | `>= 15.0` | `Choicy_1.5.5~b4_Rootless.deb` |
+| GitHub native Roothide | `>= 15.0` | `Choicy_1.5.5~b4_Roothide.deb` |
+| GitHub Rootful | `>= 15.0` | `Choicy_1.5.5~b4_Rootful.deb` |
+| Local Legacy Rootful | `>= 10.0` | `Choicy_1.5.5~b4_Rootful_Legacy_iOS10.deb` |
 
 ---
 
