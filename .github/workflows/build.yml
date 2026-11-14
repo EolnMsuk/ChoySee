@@ -169,6 +169,8 @@ jobs:
           set -euo pipefail
           python3 -c 'from pathlib import Path; assert not list(Path("packages").glob("*.deb")), "Unexpected preexisting packages"'
           make clean CHOICY_LEGACY=0 TARGET="$BUILD_TARGET" ARCHS="$BUILD_ARCHS" THEOS_PACKAGE_SCHEME="$THEOS_PACKAGE_SCHEME"
+          # Browser uploads lose executable bits; Debian maintainer scripts require them.
+          chmod 0755 layout/DEBIAN/postinst layout/DEBIAN/postrm
           make package CHOICY_LEGACY=0 FINALPACKAGE=1 TARGET="$BUILD_TARGET" ARCHS="$BUILD_ARCHS" THEOS_PACKAGE_SCHEME="$THEOS_PACKAGE_SCHEME"
 
       - name: Verify metadata and payload, then label the package
