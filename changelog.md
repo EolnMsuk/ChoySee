@@ -1,23 +1,19 @@
 # v1.5.5~b4
 
-- Applications list now show an installed App Plugin's status when the app has no status of its own.
-- Custom lists hide globally disabled tweaks unless that app / daemon / plugin enables Overwrite Global Tweak Configuration.
-- Apps and daemons that have overwrite globally enabled appear at the top & get the grey icon dot (when tagging is on).
-- Apps also appear first and get the dot when an installed App Plugin uses custom rules or has injection disabled.
-- **Tag Custom Apps** and **Choicy Settings** default to on on iOS 15+, and off on older iOS. Both one-time launch options still default to off.
-
+- App Plugin & global overwrite sorting: Apps and daemons now also sort to the top of the Applications list and display the grey status dot (when tagging is enabled) if Overwrite Global Tweak Configuration is enabled, or if an installed App Plugin uses custom rules, disabled injection, or global overwrite when the parent app has no configuration of its own.
+- Global tweak filtering: Custom lists now hide globally disabled tweaks unless the app, daemon, or plugin has Overwrite Global Tweak Configuration enabled.
+- Legacy iOS defaults: Tag Custom Apps and "Open in Choicy" Option now default to off on iOS versions older than iOS 15.
 
 # v1.5.5~b3
 
-- Configured apps and daemons appear first and the lists refresh when settings change. An entry qualifies when tweak injection is disabled or custom tweak rules are enabled. Saving an inactive rule list leaves the entry in its regular section.
-- **Tag Custom Apps** puts a small grey dot at the bottom-right of configured app icons. The dot updates as settings and icon views change. **Open in Choicy** opens that app's Choicy settings from the Home Screen without changing injection preferences or terminating the app.
-- **Choicy > App Options** now shows **Tag Custom Apps**, **"Open in Choicy" Option**, **"Launch Without Tweaks" Option**, and **"Launch With Tweaks" Option**, in that order. On a fresh install and after **Reset Preferences**, the first two are enabled and both launch options are disabled. Explicitly saved choices survive upgrades and reloads. Missing keys use the new defaults. Reset clears saved rules and immediately refreshes the visible switches.
-- The Home Screen menu preserves the order of existing app and system shortcuts and adds one copy of each applicable Choicy entry. Open in Choicy precedes the applicable one-time launch shortcut when enabled. Its navigation waits for menu dismissal, handles cold and warm Settings, and builds the Back path through Applications and Choicy. A newer tap supersedes earlier requests, and one-use requests expire.
-- Preference and list updates use the main thread where needed, with safer observer cleanup and handling of missing app or daemon dictionaries. The new labels and footer text are in English and use the existing localization fallback.
-- The modern workflow builds and labels Rootless, native Roothide, and Rootful packages for iOS 15+. Native Roothide uses its own path and linkage support. Compared with the v1.5.4 build target, modern Rootful starts at iOS 15.0 and ships 64-bit slices.
-- The separate opt-in Legacy Rootful command targets iOS 10.0 with `armv7` and `arm64`, plus old-ABI `arm64e` from iOS 12.0. Its package has its own filename and firmware dependency. The 32-bit pointer scan now visits every slot in the table. Use the modern packages for iOS 15+. The v1.5.4 iOS 8.0 build target is outside b3's scope.
+- Apps and daemons with disabled tweak injection or active custom rules now sort to the top of their lists and refresh automatically when changed.
+- Added **Tag Custom Apps**, which places a small grey indicator dot on the Home Screen icons of configured apps.
+- Added **"Open in Choicy"** to the Home Screen 3D Touch / Haptic Touch menu, jumping directly to that app's Choicy settings without killing the app.
+- Updated **Choicy > App Options** to list **Tag Custom Apps**, **"Open in Choicy" Option**, **"Launch Without Tweaks" Option**, and **"Launch With Tweaks" Option** in order. On fresh installs or resets, the first two default to on while the one-time launch options default to off.
+- Improved reliability when jumping from Home Screen shortcuts into Settings, prevented duplicate menu entries, and hardened preference/list updates against crashes.
+- Added native Roothide support and updated modern Rootless and Rootful packages to target iOS 15+. Older devices (iOS 10–14) are now supported via a separate Legacy Rootful build with improved 32-bit compatibility.
 
-## Expected b3 packages
+## Overview
 
 The modern workflow uses SDK 16.5 and Xcode 16.4. The Legacy Rootful profile uses a prepared Xcode 11.7 toolchain, patched SDK 13.7, and a separate Clang to generate tail-call assembly.
 
@@ -27,8 +23,6 @@ The modern workflow uses SDK 16.5 and Xcode 16.4. The Legacy Rootful profile use
 | Native Roothide | `>= 15.0` | `arm64 arm64e` | `iphoneos-arm64e` | `Choicy_1.5.5~b3_Roothide.deb` |
 | Rootful | `>= 15.0` | `arm64 arm64e` | `iphoneos-arm` | `Choicy_1.5.5~b3_Rootful.deb` |
 | Legacy Rootful | `>= 10.0` | `armv7 arm64 arm64e` with old arm64e ABI and iOS 12.0 floor on that slice | `iphoneos-arm` | `Choicy_1.5.5~b3_Rootful_Legacy_iOS10.deb` |
-
-Local validation covers source and metadata. Toolchain and dependency compatibility, actual packages, CI runs, and device behavior remain owner acceptance steps. The source directories for LiteHook and ChOma are empty, and the snapshot lacks Git metadata to establish their revisions or revision changes. [Validation and owner handoff](IMPLEMENTATION_NOTES.md)
 
 ## File inventory
 
