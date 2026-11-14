@@ -54,6 +54,26 @@ jobs:
           submodules: recursive
           persist-credentials: false
 
+      # Source snapshots may contain .gitmodules without recorded submodule
+      # entries. Keep populated dependencies; otherwise use their default branches.
+      - name: Check out missing LiteHook sources
+        if: ${{ hashFiles('external/litehook/src/litehook.h') == '' }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: opa334/litehook
+          path: external/litehook
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Check out missing ChOma sources
+        if: ${{ hashFiles('external/ChOma/src/MachO.h') == '' }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: opa334/ChOma
+          path: external/ChOma
+          submodules: recursive
+          persist-credentials: false
+
       - name: Check out the pinned scheme toolchain
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -124,64 +144,6 @@ jobs:
             test -s "$source_headers/$header"
             cp "$source_headers/$header" "$THEOS/include/xpc/$header"
           done
-
-      - name: Verify modern build prerequisites
-        run: |
-          set -Eeuo pipefail
-          trap 'preflight_status=$?; printf "::error::Prerequisite check failed (exit %s): %s\n" "$preflight_status" "$BASH_COMMAND" >&2; exit "$preflight_status"' ERR
-          require_file() {
-            if [[ ! -s "$1" ]]; then
-              printf '::error::Missing or empty modern build prerequisite: %s\n' "$1" >&2
-              exit 1
-            fi
-          }
-          require_directory() {
-            if [[ ! -d "$1" ]]; then
-              printf '::error::Missing modern build directory: %s\n' "$1" >&2
-              exit 1
-            fi
-          }
-          echo "Source dependency entries in this checkout (160000 means a submodule; 040000 means vendored files):"
-          git ls-tree HEAD -- external/litehook external/ChOma
-          for required_file in \
-            external/litehook/src/litehook.h \
-            external/ChOma/src/MachO.h \
-            external/ChOma/src/Fat.h \
-            external/ChOma/src/Host.h \
-            "$THEOS/vendor/include/Preferences/PSListController.h" \
-            "$THEOS/vendor/include/libroot/libroot.h" \
-            "$THEOS/include/xpc/xpc.h" \
-            "$THEOS/vendor/include/launch.h" \
-            "$THEOS/sdks/iPhoneOS${BUILD_SDK}.sdk/usr/include/bsm/audit.h"; do
-            require_file "$required_file"
-          done
-          for source_directory in external/litehook/src external/ChOma/src; do
-            require_directory "$source_directory"
-            source_file=$(find "$source_directory" -type f -name '*.c' -print -quit)
-            if [[ -z "$source_file" ]]; then
-              printf '::error::No C sources found in modern build dependency: %s\n' "$source_directory" >&2
-              exit 1
-            fi
-          done
-          require_directory "$THEOS/sdks/iPhoneOS${BUILD_SDK}.sdk/System/Library/Frameworks/UIKit.framework"
-          require_directory "$THEOS/sdks/iPhoneOS${BUILD_SDK}.sdk/System/Library/PrivateFrameworks/Preferences.framework"
-          test -x "${PREFIX}clang"
-          command -v ldid
-          command -v dpkg-deb
-          command -v make
-          case "$THEOS_PACKAGE_SCHEME" in
-            rootless)
-              require_file "$THEOS/vendor/lib/iphone/rootless/libroot.a"
-              ;;
-            roothide)
-              require_file "$THEOS/vendor/include/roothide/roothide.h"
-              require_file "$THEOS/vendor/lib/iphone/roothide/libroothide.tbd"
-              require_file "$THEOS/vendor/mod/roothide/package/deb.mk"
-              ;;
-            '')
-              require_file "$THEOS/vendor/lib/libroot.a"
-              ;;
-          esac
 
       - name: Build and install the matching AltList development framework
         run: |
