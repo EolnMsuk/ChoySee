@@ -30,6 +30,7 @@
 	[super viewDidLoad];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(choicy_preferencesDidReload:) name:kChoicyPreferencesDidReloadNotification object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(choicy_preferencesDidReload:) name:kChoicyApplicationPluginsDidChangeNotification object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(choicy_applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
 }
 
 - (void)dealloc
@@ -47,6 +48,13 @@
 
 - (void)choicy_preferencesDidReload:(NSNotification *)notification
 {
+	[self reloadSpecifiers];
+}
+
+- (void)choicy_applicationDidBecomeActive:(NSNotification *)notification
+{
+	choicyInvalidateApplicationPluginCache();
+	choicy_reloadPreferences();
 	[self reloadSpecifiers];
 }
 
@@ -100,9 +108,26 @@
 
 - (NSString *)previewStringForApplicationWithIdentifier:(NSString *)applicationID
 {
-	NSDictionary *appSettings = [preferences objectForKey:kChoicyPrefsKeyAppSettings];
-	NSDictionary *settingsForApplication = [appSettings objectForKey:applicationID];
-	return [CHPListController previewStringForProcessPreferences:settingsForApplication];
+	NSDictionary *settingsForApplication = processPreferencesForApplication(preferences, applicationID);
+	NSString *preview = [CHPListController previewStringForProcessPreferences:settingsForApplication];
+	if (preview.length) return preview;
+
+	// Plugin fallback affects the status text only, not configured sorting or dots.
+	NSDictionary *customPluginPreferences = nil;
+	NSDictionary *overridePluginPreferences = nil;
+	for (NSString *pluginID in choicyPluginIdentifiersForApplication(applicationID)) {
+		NSDictionary *pluginPreferences = processPreferencesForApplication(preferences, pluginID);
+		if (parseNumberBool(pluginPreferences[kChoicyProcessPrefsKeyTweakInjectionDisabled], NO)) {
+			return [CHPListController previewStringForProcessPreferences:pluginPreferences];
+		}
+		if (parseNumberBool(pluginPreferences[kChoicyProcessPrefsKeyCustomTweakConfigurationEnabled], NO)) {
+			customPluginPreferences = pluginPreferences;
+		}
+		else if (processPreferencesAreConfigured(pluginPreferences, preferences)) {
+			overridePluginPreferences = pluginPreferences;
+		}
+	}
+	return [CHPListController previewStringForProcessPreferences:customPluginPreferences ?: overridePluginPreferences];
 }
 
 // Older Crane versions depend on this

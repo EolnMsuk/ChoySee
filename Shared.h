@@ -32,6 +32,7 @@ extern NSSet<NSString *> *choicyGlobalDeniedTweaks(NSDictionary *preferences);
 extern BOOL processPreferencesHaveCustomRules(NSDictionary *processPreferences);
 extern BOOL processPreferencesAreConfigured(NSDictionary *processPreferences, NSDictionary *preferences);
 // Presentation helpers: call on the main thread, never from the launch/environment path.
+extern NSSet<NSString *> *choicyPluginIdentifiersForApplication(NSString *applicationID);
 extern BOOL applicationPreferencesAreConfigured(NSDictionary *preferences, NSString *applicationID);
 extern void choicyInvalidateApplicationPluginCache(void);
 extern void choicyInvalidateApplicationPluginCacheForApplication(NSString *applicationID);

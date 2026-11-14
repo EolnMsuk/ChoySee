@@ -1,17 +1,13 @@
 # v1.5.5~b4
 
-- Tag Custom Apps and the "Choicy Settings" Option now default to on on iOS 15 and later, and off on earlier iOS versions. This applies to fresh installs, missing settings, and Reset Preferences. Saved on/off choices are retained when updating. Both one-time launch options still default to off.
-- Apps and daemons that override disabled global tweaks now appear first in their lists. These apps also receive the grey icon dot when Tag Custom Apps is enabled. An override alone does not mark an entry as configured when no tweaks are disabled globally.
-- Tweaks disabled globally are hidden from an app, daemon, or App Plugin's Custom Tweak Configuration unless that process has Overwrite Global Tweak Configuration enabled. Each plugin follows its own override switch. Hidden Allow and Deny selections are kept and reappear when eligible.
-- An app also appears first and receives the grey icon dot when one of its installed App Plugins has Custom Tweak Configuration or Disable Tweak Injection enabled. Both PlugInKit and VPN plugins are included. The dot requires Tag Custom Apps to be enabled; plugin rules do not change the parent's injection settings.
-- Renamed "Open in Choicy" to "Choicy Settings" in App Options and the Home Screen menu. The App Options description now explains that this opens the selected app's Choicy configuration, alongside the one-time launch options.
-- **Keep your existing Choicy preference file (plist).** No deletion, reset, or new migration is required. Saved app, daemon, plugin, and global rules remain compatible. Reset Preferences is only needed if you want to clear your settings and restore the defaults for your iOS version.
+- Applications list now show an installed App Plugin's status when the app has no status of its own.
+- Custom lists hide globally disabled tweaks unless that app / daemon / plugin enables Overwrite Global Tweak Configuration.
+- Apps and daemons that have overwrite globally enabled appear at the top & get the grey icon dot (when tagging is on).
+- Apps also appear first and get the dot when an installed App Plugin uses custom rules or has injection disabled.
+- **Tag Custom Apps** and **Choicy Settings** default to on on iOS 15+, and off on older iOS. Both one-time launch options still default to off.
 
-The package version and current artifact names are now `1.5.5~b4`. Local validation covers source and metadata only; compilation, package inspection, and device acceptance remain owner checks. Existing b3 packages and the history below are unchanged.
 
 # v1.5.5~b3
-
-## Release notes
 
 - Configured apps and daemons appear first and the lists refresh when settings change. An entry qualifies when tweak injection is disabled or custom tweak rules are enabled. Saving an inactive rule list leaves the entry in its regular section.
 - **Tag Custom Apps** puts a small grey dot at the bottom-right of configured app icons. The dot updates as settings and icon views change. **Open in Choicy** opens that app's Choicy settings from the Home Screen without changing injection preferences or terminating the app.

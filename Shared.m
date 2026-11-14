@@ -202,8 +202,10 @@ void choicyInvalidateApplicationPluginCacheForApplication(NSString *applicationI
 
 @end
 
-static NSSet<NSString *> *choicyPluginIdentifiersForApplication(NSString *applicationID)
+NSSet<NSString *> *choicyPluginIdentifiersForApplication(NSString *applicationID)
 {
+	if (![NSThread isMainThread] || ![applicationID isKindOfClass:[NSString class]] || !applicationID.length) return [NSSet set];
+
 	static ChoicyApplicationPluginObserver *observer;
 	if (!observer) observer = [ChoicyApplicationPluginObserver new];
 	if (!choicyApplicationPluginIdentifiers) choicyApplicationPluginIdentifiers = [NSMutableDictionary new];
