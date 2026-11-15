@@ -14,7 +14,7 @@ A forked (enhanced) version of [Choicy](https://github.com/opa334/Choicy), an ad
 - **NEW** - Option to add grey dot to app icons that have custom / blocked injection. 
 - **NEW** - Auto sorts the application and daemon lists to show configured at the top.
 
-## Install Choicy on iOS 15+
+## Install Choicy
 
 1. Download the deb file matching your jailbreak environment from the [latest release](https://github.com/EolnMsuk/ChoySee/releases/latest) 
 2. Open it with Sileo or Zebra and install 
