@@ -1,5 +1,3 @@
-<img width="1280" alt="Image" src="https://github.com/user-attachments/assets/33f8efd0-7bf1-478a-98e9-e8761f4a9623" />
-
 # v1.5.5~b4
 
 - App Plugin & global overwrite sorting: Apps and daemons now also sort to the top of the Applications list and display the grey status dot (when tagging is enabled) if Overwrite Global Tweak Configuration is enabled, or if an installed App Plugin uses custom rules, disabled injection, or global overwrite when the parent app has no configuration of its own.
@@ -14,6 +12,8 @@
 - Updated **Choicy > App Options** to list **Tag Custom Apps**, **"Open in Choicy" Option**, **"Launch Without Tweaks" Option**, and **"Launch With Tweaks" Option** in order. On fresh installs or resets, the first two default to on while the one-time launch options default to off.
 - Improved reliability when jumping from Home Screen shortcuts into Settings, prevented duplicate menu entries, and hardened preference/list updates against crashes.
 - Added native Roothide support and updated modern Rootless and Rootful packages to target iOS 15+. Older devices (iOS 10–14) are now supported via a separate Legacy Rootful build with improved 32-bit compatibility.
+
+<img width="1280" alt="Image" src="https://github.com/user-attachments/assets/33f8efd0-7bf1-478a-98e9-e8761f4a9623" />
 
 ## Overview
 
