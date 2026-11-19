@@ -19,6 +19,7 @@
 "DENY"="Запретить";
 "DISABLE_TWEAK_INJECTION"="Отключить все модули";
 "DONATE"="💸 Пожертвовать";
+"DONATE_ROW"="Пожертвовать";
 "DONT_SHOW_AGAIN"="Больше не показывать";
 "ERROR"="Ошибка";
 "ERROR_FILE_NOT_FOUND"="Указанный путь не содержит файла.";

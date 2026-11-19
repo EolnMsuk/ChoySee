@@ -39,6 +39,7 @@
 "GLOBAL_TWEAK_CONFIGURATION_BOTTOM_NOTICE" = "ניתן להחליף תצורה גלובלית זו על בסיס כל תהליך על ידי הפעלת הלחצן \"תצורה גלובלית של טוויקים\" בדף ההעדפות של התהליך.";
 "OTHER" = "אחר";
 "DONATE" = "💸 תרומה";
+"DONATE_ROW" = "תרומה";
 "CREDITS" = "קרדיטים";
 "RESPRING" = "ריספינג";
 "WARNING_ALERT_TITLE" = "אזהרה";

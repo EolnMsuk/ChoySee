@@ -43,10 +43,11 @@
 "TWEAKS" = "Tweaks";
 "GLOBAL_TWEAK_CONFIGURATION_BOTTOM_NOTICE" = "This global configuration can be overwritten on a per process basis by enabling the \"Overwrite Global Tweak Configuration\" toggle in the preference page of a process.";
 "OTHER" = "Other";
-"UPDATES" = "🔄 Updates";
-"GITHUB" = "🛠  GitHub";
+"UPDATES" = "Updates";
+"GITHUB" = "GitHub";
 "REDDIT" = "Reddit";
 "DONATE" = "💸 Donate";
+"DONATE_ROW" = "Donate";
 "VENMO" = "Venmo";
 "CRYPTO" = "Crypto";
 "CRYPTO_WALLETS" = "Crypto Wallets";

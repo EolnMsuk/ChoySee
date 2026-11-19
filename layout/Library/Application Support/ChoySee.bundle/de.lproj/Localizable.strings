@@ -39,6 +39,7 @@
 "GLOBAL_TWEAK_CONFIGURATION_BOTTOM_NOTICE" = "Diese Globale Konfiguration kann per Prozess überschrieben werden indem die \"Globale Konfiguration überschreiben\" Option in den Einstellungen eines Prozesses aktiviert wird.";
 "OTHER" = "Anderes";
 "DONATE" = "💸 Spenden";
+"DONATE_ROW" = "Spenden";
 "CREDITS" = "Credits";
 "RESPRING" = "Respring";
 "WARNING_ALERT_TITLE" = "Warnung";

@@ -39,6 +39,7 @@
 /*GLOBAL_TWEAK_CONFIGURATION_BOTTOM_NOTICE*/
 "OTHER" = "Άλλα";
 "DONATE" = "💸 Δωρεά";
+"DONATE_ROW" = "Δωρεά";
 "CREDITS" = "Πιστώσεις";
 "RESPRING" = "Επανεκκίνηση/Επαναφορά";
 "WARNING_ALERT_TITLE" = "Προειδοποίηση τίτλου";

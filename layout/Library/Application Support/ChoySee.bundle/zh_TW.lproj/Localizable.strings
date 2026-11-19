@@ -39,6 +39,7 @@
 "GLOBAL_TWEAK_CONFIGURATION_BOTTOM_NOTICE" = "開啟「覆寫全域插件設定」 選項可以自訂每個行程的全域設定。";
 "OTHER" = "更多";
 "DONATE" = "💸 捐款";
+"DONATE_ROW" = "捐款";
 "CREDITS" = "貢獻";
 "RESPRING" = "重新啟動主畫面";
 "WARNING_ALERT_TITLE" = "警告";
