@@ -60,6 +60,5 @@ sh ./legacy_build.sh
 
 ## Credits
 
-- EolnMsuk develops ChoySee. [EolnMsuk on GitHub](https://github.com/EolnMsuk)
-- opa334 develops the original Choicy. [Original Choicy repository](https://github.com/opa334/Choicy)
-- The Reddit icon comes from the [official Reddit brand assets](https://redditinc.com/brand).
+- EolnMsuk ChoySee. [EolnMsuk on GitHub](https://github.com/EolnMsuk)
+- opa334 Choicy. [Original Choicy repository](https://github.com/opa334/Choicy)
