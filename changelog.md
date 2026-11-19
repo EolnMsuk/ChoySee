@@ -52,7 +52,7 @@ All four packages require a tweak loader that provides `mobilesubstrate`, AltLis
 
 ### Full file list
 
-#### Modified in place (34)
+#### Modified in place
 
 - `.gitignore`
 - `ChoicyPrefs/CHPApplicationListSubcontrollerController.m`
@@ -93,7 +93,7 @@ All four packages require a tweak loader that provides `mobilesubstrate`, AltLis
 
 These files were previously under `layout/Library/Application Support/Choicy.bundle/`.
 
-**Moved and edited (9)**
+**Moved and edited**
 
 - `layout/Library/Application Support/ChoySee.bundle/ar.lproj/Localizable.strings`
 - `layout/Library/Application Support/ChoySee.bundle/de.lproj/Localizable.strings`
@@ -105,7 +105,7 @@ These files were previously under `layout/Library/Application Support/Choicy.bun
 - `layout/Library/Application Support/ChoySee.bundle/zh_Hans.lproj/Localizable.strings`
 - `layout/Library/Application Support/ChoySee.bundle/zh_TW.lproj/Localizable.strings`
 
-**Moved (8)**
+**Moved**
 
 - `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon@2x.png`
 - `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon@3x.png`
@@ -133,11 +133,6 @@ These files were previously under `layout/Library/Application Support/Choicy.bun
 - `ChoicyRoot.h`
 - `control.legacy`
 - `legacy_build.sh`
-- `screenshots/1SS.PNG`
-- `screenshots/2SS.PNG`
-- `screenshots/3SS.PNG`
-- `screenshots/4SS.PNG`
-- `screenshots/main.PNG`
 - `scripts/legacy-clang.sh`
 - `scripts/package-legacy.py`
 - `scripts/package_metadata.py`
