@@ -112,7 +112,7 @@ static void choicyOpenSettingsURL(NSURL *url, void (^completion)(BOOL))
 		[application openURL:url options:@{} completionHandler:completion];
 		return;
 	}
-	NSLog(@"Choicy could not find a Settings URL opener");
+	NSLog(@"ChoySee could not find a Settings URL opener");
 	completion(NO);
 }
 
@@ -124,19 +124,19 @@ static dispatch_block_t choicyPrepareApplicationSettingsActivation(SBSApplicatio
 	NSString *route = [@"prefs:root=" stringByAppendingString:kChoicyPreferencesRootID];
 	NSURL *url = [NSURL URLWithString:route];
 	if (![route isEqualToString:url.absoluteString]) {
-		NSLog(@"Choicy could not construct its Settings URL");
+		NSLog(@"ChoySee could not construct its Settings URL");
 		return nil;
 	}
 
 	// Stage during the tap so a new selection supersedes any pending dismissal or launch.
 	NSString *requestID = choicyStageApplicationSettingsRequest(applicationID);
 	if (!requestID) {
-		NSLog(@"Choicy could not stage its Settings request");
+		NSLog(@"ChoySee could not stage its Settings request");
 		return nil;
 	}
 	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kChoicyOpenRequestLifetime * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 		if (choicyCancelApplicationSettingsRequest(requestID)) {
-			NSLog(@"Choicy Settings request expired before navigation");
+			NSLog(@"ChoySee Settings request expired before navigation");
 		}
 	});
 
@@ -147,12 +147,12 @@ static dispatch_block_t choicyPrepareApplicationSettingsActivation(SBSApplicatio
 			choicyOpenSettingsURL(url, ^(BOOL accepted) {
 				if (!accepted) {
 					choicyCancelApplicationSettingsRequest(requestID);
-					NSLog(@"Choicy could not open %@", url);
+					NSLog(@"ChoySee could not open %@", url);
 					return;
 				}
 				if (!choicyMarkApplicationSettingsRequestReady(requestID)) {
 					if (choicyCancelApplicationSettingsRequest(requestID)) {
-						NSLog(@"Choicy could not mark its Settings request ready");
+						NSLog(@"ChoySee could not mark its Settings request ready");
 					}
 					return;
 				}
@@ -399,7 +399,7 @@ void choicy_initSpringBoard(void)
 		choicy_refreshIconTags();
 	}];
 
-	CHBundle = [NSBundle bundleWithPath:JBROOT_PATH_NSSTRING(@"/Library/Application Support/Choicy.bundle")];
+	CHBundle = [NSBundle bundleWithPath:JBROOT_PATH_NSSTRING(@"/Library/Application Support/ChoySee.bundle")];
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, respring, CFSTR("com.opa334.choicy/respring"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
 
 	if (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_13_0) {
