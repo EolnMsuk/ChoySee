@@ -27,19 +27,6 @@ Download the file for your jailbreak environment from the [latest ChoySee releas
 | Modern Rootful | iOS 15.0+ | `com.eolnmsuk.choysee_1.0.0_rootful.deb` |
 | Legacy Rootful | iOS 10.0+ | `com.eolnmsuk.choysee_1.0.0_rootful_legacy_ios10.deb` |
 
-- **Fresh install.** Open the downloaded file in Sileo or Zebra and install ChoySee. Then open **Settings → ChoySee**.
-- **Replacing Choicy.** Open the downloaded file in your package manager and confirm the proposed replacement. ChoySee reads your saved Choicy rules when you open **Settings → ChoySee**.
-
-## Other in Settings
-
-- Tap **Updates** under **Settings → ChoySee → Other** to check for the latest stable release. If a newer release is available, tap **View Release** to open its page.
-- **GitHub** opens the ChoySee repository. [ChoySee on GitHub](https://github.com/EolnMsuk/ChoySee/)
-- **Reddit** opens EolnMsuk’s profile. [EolnMsuk on Reddit](https://www.reddit.com/user/EolnMsuk4334/)
-- **Donate** opens a menu with Venmo and eight crypto wallets. Tap a wallet to copy its address. [Donate via Venmo](https://venmo.com/EolnMsuk/)
-- **Credits** lists the fork and original developers and the existing contributors.
-
-See the [ChoySee changelog](changelog.md) for release changes.
-
 ## Build profiles
 
 On a prepared macOS host, `sh ./release_build.sh` verifies and copies the three modern downloads to `artifacts/`. The legacy build uses a separate entry point and writes to `artifacts/legacy/`.
