@@ -383,7 +383,7 @@
 		[_specifiers addObject:groupSpecifier];
 
 		[_packageList enumerateObjectsUsingBlock:^(CHPPackageInfo *packageInfo, NSUInteger idx, BOOL *stop) {
-			if ([packageInfo.name isEqualToString:@"Choicy"]) return;
+			if ([packageInfo.identifier isEqualToString:@"com.eolnmsuk.choysee"]) return;
 			PSSpecifier *packageSpecifier = [self newSpecifierForPackage:packageInfo];
 			[_specifiers addObject:packageSpecifier];
 		}];

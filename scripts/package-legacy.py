@@ -13,20 +13,13 @@ import subprocess
 import tarfile
 import tempfile
 
+from package_metadata import (DYLIBS, IMAGES, PREFS_INFO, PROJECT, control_fields, modern_metadata, release_filename,
+                              require, required_payload, verify_bundle_metadata, verify_dependencies, verify_metadata)
 
-PROJECT = Path(__file__).resolve().parents[1]
 MINIMUMS = {"armv7": (10, 0, 0), "arm64": (10, 0, 0), "arm64e": (12, 0, 0)}
 ALTLIST = "/Library/Frameworks/AltList.framework/AltList"
 SUBSTRATE = {"/Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate", "/usr/lib/libsubstrate.dylib"}
-DYLIBS = "Library/MobileSubstrate/DynamicLibraries"
-PREFS = "Library/PreferenceBundles/ChoicyPrefs.bundle"
-IMAGES = (f"{DYLIBS}/   Choicy.dylib", f"{DYLIBS}/ChoicySB.dylib", f"{PREFS}/ChoicyPrefs")
 SCRIPTS = ("postinst", "postrm")
-
-
-def require(condition, message):
-    if not condition:
-        raise SystemExit(message)
 
 
 def output(*command):
@@ -173,28 +166,11 @@ def preflight(theos, sdk):
             "Prepare dpkg-deb with --root-owner-group and --uniform-compression support")
 
 
-def control_fields(control):
-    fields = {}
-    for line in control.splitlines():
-        key, separator, value = line.partition(":")
-        require(separator and key not in fields, f"Invalid control field: {line!r}")
-        fields[key] = value.strip()
-    return fields
-
-
 def legacy_metadata():
-    modern = control_fields((PROJECT / "control").read_text(encoding="utf-8"))
+    modern = modern_metadata()
     legacy = control_fields((PROJECT / "control.legacy").read_text(encoding="utf-8"))
-    runtime = {"mobilesubstrate", "com.opa334.altlist (>=1.0.4)", "preferenceloader"}
-    for fields, ios in ((modern, "15.0"), (legacy, "10.0")):
-        require(fields.get("Package") == "com.opa334.choicy" and fields.get("Architecture") == "iphoneos-arm",
-                f"Unexpected package ID or Rootful architecture in iOS {ios} control")
-        depends = [entry.strip() for entry in fields["Depends"].split(",")]
-        require(len(depends) == 4 and set(depends) == runtime | {f"firmware (>= {ios})"},
-                f"Unexpected iOS {ios} dependencies: {depends}")
-    version = legacy.get("Version", "")
-    require(version == modern.get("Version") and re.fullmatch(r"[0-9][A-Za-z0-9.+~\-]*", version),
-            "control.legacy must use the same release version as control")
+    verify_metadata(legacy, "iphoneos-arm", modern["Version"])
+    verify_dependencies(legacy, "10.0")
     return legacy
 
 
@@ -234,6 +210,7 @@ def verify_package(package, metadata, required):
             for relative in required:
                 member = members[relative]
                 require(member.isfile() and member.size, f"Missing regular payload file: {relative}")
+            verify_bundle_metadata(archive.extractfile(members[PREFS_INFO]).read(), metadata["Version"])
             for relative in IMAGES:
                 image = package.parent / Path(relative).name
                 image.write_bytes(archive.extractfile(members[relative]).read())
@@ -247,10 +224,7 @@ def package_stage(stage):
     build = PROJECT / ".theos"
     require(not build.is_symlink() and stage.is_dir() and build in stage.parents, f"Expected a project .theos staging directory: {stage}")
     layout = PROJECT / "layout"
-    resources = sorted(path.relative_to(layout).as_posix() for path in (layout / "Library").rglob("*") if path.is_file())
-    require(any(name.endswith("/Localizable.strings") for name in resources), "Missing source localizations")
-    required = (*IMAGES, f"{DYLIBS}/   Choicy.plist", f"{DYLIBS}/ChoicySB.plist", f"{PREFS}/Info.plist", f"{PREFS}/Root.plist",
-                "Library/PreferenceLoader/Preferences/ChoicyPrefs.plist", *resources)
+    required = required_payload()
     verify_payload({path.relative_to(stage).as_posix() for path in stage.rglob("*")}, required)
     for relative in required:
         first_file([stage / relative])
@@ -282,7 +256,7 @@ def package_stage(stage):
     artifacts = PROJECT / "artifacts/legacy"
     require(artifacts.resolve() == artifacts, "Legacy artifact directory must be inside the project and free of symlinks")
     artifacts.mkdir(parents=True, exist_ok=True)
-    destination = artifacts / f"Choicy_{metadata['Version']}_Rootful_Legacy_iOS10.deb"
+    destination = artifacts / release_filename(metadata, "rootful_legacy_ios10")
     with tempfile.TemporaryDirectory(prefix=".package-", dir=artifacts) as scratch:
         package = Path(scratch) / destination.name
         subprocess.run(["dpkg-deb", "--root-owner-group", "--uniform-compression", "-Zgzip", "--build", stage, package], check=True)

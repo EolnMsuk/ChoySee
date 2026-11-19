@@ -1,10 +1,12 @@
 # ChoySee
 
-A *forked* version of [Choicy](https://github.com/opa334/Choicy) by [opa334](https://github.com/opa334), an *enhanced* tweak configurator!
+ChoySee is EolnMsuk’s fork of opa334’s Choicy for configuring tweak injection on jailbroken iOS.
 
 ---
 
-<img width="4773" height="2589" alt="main" src="https://github.com/user-attachments/assets/e191b5bd-8d7b-4108-bde1-971d11b46af4" />
+*Historical screenshots of the Choicy-branded Settings interface.*
+
+<img width="4773" height="2589" alt="Historical screenshots of the Choicy Settings interface" src="https://github.com/user-attachments/assets/e191b5bd-8d7b-4108-bde1-971d11b46af4" />
 
 ## Features
 
@@ -12,23 +14,37 @@ A *forked* version of [Choicy](https://github.com/opa334/Choicy) by [opa334](htt
 - Configure each tweak dylib individually for every process
 - Disable tweaks globally (with the ability to set exceptions for individual processes)
 - Option for an application shortcut to launch the application with or without tweaks once
-- **NEW** - Option for an application shortcut to launch injection settings for that app.
-- **NEW** - Option to add grey dot to app icons that have custom / blocked injection. 
-- **NEW** - Auto sorts the application and daemon lists to show configured at the top.
+- Open an app’s injection settings from its **ChoySee Settings** Home Screen shortcut.
+- Mark apps with custom rules or disabled injection with a grey dot on their icons.
+- Show configured apps and daemons first in their respective lists.
 
-## Install Choicy
+## Install ChoySee
 
-1. Download the deb file matching your jailbreak environment from the [latest release](https://github.com/EolnMsuk/ChoySee/releases/latest) 
-2. Open it with Sileo or Zebra and install 
+Download the file for your jailbreak environment from the [latest ChoySee release](https://github.com/EolnMsuk/ChoySee/releases/latest).
 
-| Environment | Firmware dependency | Filename |
+| Profile | Firmware dependency | Filename |
 | --- | --- | --- |
-| GitHub Rootless | `>= 15.0` | `Choicy_1.5.5~b3_Rootless.deb` |
-| GitHub native Roothide | `>= 15.0` | `Choicy_1.5.5~b3_Roothide.deb` |
-| GitHub Rootful | `>= 15.0` | `Choicy_1.5.5~b3_Rootful.deb` |
-| Local Legacy Rootful | `>= 10.0` | `Choicy_1.5.5~b3_Rootful_Legacy_iOS10.deb` |
+| Rootless | iOS 15.0+ | `com.eolnmsuk.choysee_1.0.0_rootless.deb` |
+| Native Roothide | iOS 15.0+ | `com.eolnmsuk.choysee_1.0.0_roothide.deb` |
+| Modern Rootful | iOS 15.0+ | `com.eolnmsuk.choysee_1.0.0_rootful.deb` |
+| Legacy Rootful | iOS 10.0+ | `com.eolnmsuk.choysee_1.0.0_rootful_legacy_ios10.deb` |
 
----
+- **Fresh install.** Open the downloaded file in Sileo or Zebra and install ChoySee. Then open **Settings → ChoySee**.
+- **Replacing Choicy.** Open the downloaded file in your package manager and confirm the proposed replacement. ChoySee reads your saved Choicy rules when you open **Settings → ChoySee**.
+
+## Other in Settings
+
+- Tap **Updates** under **Settings → ChoySee → Other** to check for the latest stable release. If a newer release is available, tap **View Release** to open its page.
+- **GitHub** opens the ChoySee repository. [ChoySee on GitHub](https://github.com/EolnMsuk/ChoySee/)
+- **Reddit** opens EolnMsuk’s profile. [EolnMsuk on Reddit](https://www.reddit.com/user/EolnMsuk4334/)
+- **Donate** opens a menu with Venmo and eight crypto wallets. Tap a wallet to copy its address. [Donate via Venmo](https://venmo.com/EolnMsuk/)
+- **Credits** lists the fork and original developers and the existing contributors.
+
+See the [ChoySee changelog](changelog.md) for release changes.
+
+## Build profiles
+
+On a prepared macOS host, `sh ./release_build.sh` verifies and copies the three modern downloads to `artifacts/`. The legacy build uses a separate entry point and writes to `artifacts/legacy/`.
 
 ### Legacy Rootful on a prepared macOS host
 
@@ -42,7 +58,8 @@ GEN_CLANG=/absolute/path/to/musttail-capable/clang \
 sh ./legacy_build.sh
 ```
 
-## Credit
+## Credits
 
-- EolnMsuk: [ChoySee](https://github.com/EolnMsuk/ChoySee) | [Donate](https://venmo.com/u/EolnMsuk/)
-- oppa334: [Choicy](https://github.com/opa334/Choicy) | [Donate](opa334.github.io/donate.html)
+- EolnMsuk develops ChoySee. [EolnMsuk on GitHub](https://github.com/EolnMsuk)
+- opa334 develops the original Choicy. [Original Choicy repository](https://github.com/opa334/Choicy)
+- The Reddit icon comes from the [official Reddit brand assets](https://redditinc.com/brand).

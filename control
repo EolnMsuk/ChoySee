@@ -1,10 +1,12 @@
-Package: com.opa334.choicy
-Name: Choicy
+Package: com.eolnmsuk.choysee
+Name: ChoySee
 Depends: firmware (>= 15.0), mobilesubstrate, com.opa334.altlist (>=1.0.4), preferenceloader
-Version: 1.5.5~b4
+Version: 1.0.0
 Architecture: iphoneos-arm
-Description: Advanced Tweak Configuration!
-Depiction: https://opa334.github.io/depic/Choicy/index.html
-Maintainer: opa334 <opa334@protonmail.com>
-Author: opa334 <opa334@protonmail.com>
+Description: Advanced tweak configuration. EolnMsuk's fork of opa334's Choicy.
+Maintainer: EolnMsuk
+Author: EolnMsuk
+Conflicts: com.opa334.choicy
+Replaces: com.opa334.choicy
+Homepage: https://github.com/EolnMsuk/ChoySee/
 Section: Tweaks

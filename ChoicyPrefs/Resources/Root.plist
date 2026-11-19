@@ -173,30 +173,38 @@
 		</dict>
 		<dict>
 			<key>action</key>
-			<string>sourceLink</string>
+			<string>checkForUpdates</string>
 			<key>cell</key>
 			<string>PSButtonCell</string>
-			<key>icon</key>
-			<string>GitHub</string>
+			<key>id</key>
+			<string>CheckUpdates</string>
 			<key>label</key>
-			<string>SOURCE_CODE</string>
+			<string>UPDATES</string>
 		</dict>
 		<dict>
 			<key>action</key>
-			<string>openMastodon</string>
+			<string>openGitHub</string>
 			<key>cell</key>
 			<string>PSButtonCell</string>
-			<key>icon</key>
-			<string>Mastodon</string>
 			<key>label</key>
-			<string>FOLLOW_ME_ON_MASTODON</string>
+			<string>GITHUB</string>
 		</dict>
 		<dict>
 			<key>action</key>
-			<string>donationLink</string>
+			<string>openReddit</string>
 			<key>cell</key>
 			<string>PSButtonCell</string>
 			<key>icon</key>
+			<string>Reddit</string>
+			<key>label</key>
+			<string>REDDIT</string>
+		</dict>
+		<dict>
+			<key>action</key>
+			<string>presentDonationMenu</string>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>id</key>
 			<string>Donate</string>
 			<key>label</key>
 			<string>DONATE</string>
@@ -206,8 +214,6 @@
 			<string>PSLinkListCell</string>
 			<key>icon</key>
 			<string>Credits</string>
-			<key>defaults</key>
-			<string>com.opa334.safariplusprefs</string>
 			<key>detail</key>
 			<string>CHPCreditsListController</string>
 			<key>label</key>
@@ -231,10 +237,11 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string>© 2019-2024 Lars Fröder (opa334)</string>
+			<string>ChoySee by EolnMsuk
+© 2019-2024 Lars Fröder (opa334)</string>
 		</dict>
 	</array>
 	<key>title</key>
-	<string>Choicy</string>
+	<string>ChoySee</string>
 </dict>
 </plist>

@@ -51,7 +51,7 @@ NSString *localize(NSString *key)
 	}
 
 	if (!CHBundle) {
-		CHBundle = [NSBundle bundleWithPath:JBROOT_PATH_NSSTRING(@"/Library/Application Support/Choicy.bundle")];
+		CHBundle = [NSBundle bundleWithPath:JBROOT_PATH_NSSTRING(@"/Library/Application Support/ChoySee.bundle")];
 	}
 
 	NSString *localizedString = [CHBundle localizedStringForKey:key value:key table:nil];

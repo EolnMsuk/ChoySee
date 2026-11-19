@@ -43,6 +43,16 @@
 	}
 }
 
+- (void)openChoySeeDeveloper
+{
+	[self openURL:[NSURL URLWithString:@"https://github.com/EolnMsuk"]];
+}
+
+- (void)openChoicyDeveloper
+{
+	[self openURL:[NSURL URLWithString:@"https://github.com/opa334"]];
+}
+
 - (void)openQuickPrefs
 {
 	[self openURL:[NSURL URLWithString:@"https://github.com/AnthoPakPak/QuickPrefs"]];

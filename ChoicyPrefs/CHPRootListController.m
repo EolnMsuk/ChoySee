@@ -26,6 +26,9 @@
 #import "CHPPreferences.h"
 #import "CHPApplicationListSubcontrollerController.h"
 #import "CHPProcessConfigurationListController.h"
+#import "ChoySeeDonationController.h"
+#import "ChoySeeSettingsPresentation.h"
+#import "ChoySeeUpdateChecker.h"
 #import "CoreServices.h"
 #import "../ChoicyPrefsMigrator.h"
 #import "../ChoicyRoot.h"
@@ -142,9 +145,13 @@ NSString *getInjectionPlatform()
 
 @interface CHPRootListController ()
 @property (nonatomic) BOOL choicyOpenScheduled;
+@property (nonatomic) BOOL updateCheckInProgress;
+@property (nonatomic) BOOL showUpdateResult;
 - (void)choicy_schedulePendingApplicationSettings;
 - (void)choicy_openPendingApplicationSettings;
 @end
+
+static NSString *const ChoySeeUpdatesSpecifierID = @"CheckUpdates";
 
 static void choicyOpenRequestReceived(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
 {
@@ -163,6 +170,9 @@ static void choicyOpenRequestReceived(CFNotificationCenterRef center, void *obse
 			NSString *key = [specifier propertyForKey:@"key"];
 			if ([key isEqualToString:kChoicyPrefsKeyTagCustomAppsEnabled] || [key isEqualToString:kChoicyPrefsKeyOpenInChoicyOptionEnabled]) {
 				[specifier setProperty:@(choicyAppOptionsDefaultEnabled()) forKey:@"default"];
+			}
+			if ([specifier.identifier isEqualToString:ChoySeeUpdatesSpecifierID]) {
+				[specifier setProperty:@(!self.updateCheckInProgress) forKey:@"enabled"];
 			}
 		}
 	}
@@ -194,6 +204,12 @@ static void choicyOpenRequestReceived(CFNotificationCenterRef center, void *obse
 {
 	[super viewDidAppear:animated];
 	[self choicy_schedulePendingApplicationSettings];
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+	[super viewWillDisappear:animated];
+	self.showUpdateResult = NO;
 }
 
 - (void)choicy_schedulePendingApplicationSettings
@@ -247,7 +263,7 @@ static void choicyOpenRequestReceived(CFNotificationCenterRef center, void *obse
 	CHPApplicationListSubcontrollerController *applications = applicationsSpecifier ? [self controllerForSpecifier:applicationsSpecifier] : nil;
 	if (![applications isKindOfClass:[CHPApplicationListSubcontrollerController class]]) {
 		choicyCancelApplicationSettingsRequest(requestID);
-		NSLog(@"Choicy could not open its Applications list");
+		NSLog(@"ChoySee could not open its Applications list");
 		return;
 	}
 	PSSpecifier *appSpecifier = nil;
@@ -269,7 +285,7 @@ static void choicyOpenRequestReceived(CFNotificationCenterRef center, void *obse
 	if (![detail isKindOfClass:[CHPProcessConfigurationListController class]]
 		|| ![applicationID isEqual:[detail.specifier propertyForKey:@"applicationIdentifier"]]) {
 		choicyCancelApplicationSettingsRequest(requestID);
-		NSLog(@"Choicy could not open its settings for %@", applicationID);
+		NSLog(@"ChoySee could not open its settings for %@", applicationID);
 		return;
 	}
 
@@ -288,7 +304,7 @@ static void choicyOpenRequestReceived(CFNotificationCenterRef center, void *obse
 
 - (NSString *)title
 {
-	return @"Choicy";
+	return @"ChoySee";
 }
 
 - (NSString *)plistName
@@ -308,39 +324,76 @@ static void choicyOpenRequestReceived(CFNotificationCenterRef center, void *obse
 	}
 }
 
-- (void)openMastodonWithUsername:(NSString *)username instance:(NSString *)instance
+- (void)setUpdateCheckInProgress:(BOOL)inProgress
 {
-	UIApplication *app = [UIApplication sharedApplication];
+	_updateCheckInProgress = inProgress;
+	PSSpecifier *row = [self specifierForID:ChoySeeUpdatesSpecifierID];
+	[row setProperty:@(!inProgress) forKey:@"enabled"];
+	if (row && self.isViewLoaded) [self reloadSpecifier:row];
+}
 
-	NSArray *candidateURLs = @[
-		[NSURL URLWithString:[NSString stringWithFormat:@"opener://x-callback-url/show-options?url=https%%3A%%2F%%2F%@%%2F%@", instance, username]],
-		[NSURL URLWithString:[NSString stringWithFormat:@"ivory://%@/@%@", instance, username]],
-		[NSURL URLWithString:[NSString stringWithFormat:@"icecubesapp://%@/@%@", instance, username]],
-		[NSURL URLWithString:[NSString stringWithFormat:@"mastodon://profile/%@@%@", username, instance]],
-		[NSURL URLWithString:[NSString stringWithFormat:@"https://%@/@%@", instance, username]],
-	];
-
-	for (NSURL *candidateURL in candidateURLs) {
-		if ([app canOpenURL:candidateURL]) {
-			[app openURL:candidateURL];
-			break;
-		}
+- (void)presentUpdateResultForVersion:(NSString *)installedVersion tag:(NSString *)tag
+	newerReleaseURL:(NSURL *)url failure:(NSString *)failure
+{
+	NSString *title;
+	NSString *message;
+	if (failure) {
+		title = localize(@"UPDATE_CHECK_FAILED");
+		message = failure;
+	} else {
+		title = localize(url ? @"UPDATE_AVAILABLE" : @"UPDATE_UP_TO_DATE");
+		message = [NSString stringWithFormat:localize(@"UPDATE_VERSIONS"), installedVersion, tag];
 	}
+	UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
+		message:message preferredStyle:UIAlertControllerStyleAlert];
+	if (url) {
+		[alert addAction:[UIAlertAction actionWithTitle:localize(@"UPDATE_VIEW_RELEASE") style:UIAlertActionStyleDefault
+			handler:^(UIAlertAction *action) {
+				[UIApplication.sharedApplication openURL:url options:@{} completionHandler:nil];
+			}]];
+	}
+	[alert addAction:[UIAlertAction actionWithTitle:localize(url ? @"CANCEL" : @"OK")
+		style:UIAlertActionStyleCancel handler:nil]];
+	[self presentViewController:alert animated:YES completion:nil];
 }
 
-- (void)sourceLink
+- (void)checkForUpdates
 {
-	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://github.com/opa334/Choicy"]];
+	if (self.updateCheckInProgress || !ChoySeeCanPresent(self)) return;
+	self.updateCheckInProgress = YES;
+	self.showUpdateResult = YES;
+
+	NSString *version = [[NSBundle bundleForClass:CHPRootListController.class]
+		objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+	__weak CHPRootListController *weakSelf = self;
+	[ChoySeeUpdateChecker checkInstalledVersion:version completion:^(NSString *tag, NSURL *url, NSString *failure) {
+		CHPRootListController *controller = weakSelf;
+		controller.updateCheckInProgress = NO;
+		if (controller.showUpdateResult && ChoySeeCanPresent(controller)) {
+			[controller presentUpdateResultForVersion:version tag:tag newerReleaseURL:url failure:failure];
+		}
+		controller.showUpdateResult = NO;
+	}];
 }
 
-- (void)openMastodon
+- (void)openGitHub
 {
-	[self openMastodonWithUsername:@"opa334" instance:@"infosec.exchange"];
+	[UIApplication.sharedApplication openURL:[NSURL URLWithString:@"https://github.com/EolnMsuk/ChoySee/"]
+		options:@{} completionHandler:nil];
 }
 
-- (void)donationLink
+- (void)openReddit
 {
-	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=opa334@protonmail.com&item_name=iOS%20Tweak%20Development"]];
+	[UIApplication.sharedApplication openURL:[NSURL URLWithString:@"https://www.reddit.com/user/EolnMsuk4334/"]
+		options:@{} completionHandler:nil];
+}
+
+- (void)presentDonationMenu
+{
+	PSSpecifier *row = [self specifierForID:@"Donate"];
+	NSIndexPath *path = row ? [self indexPathForSpecifier:row] : nil;
+	UIView *anchor = path ? [self.table cellForRowAtIndexPath:path] : nil;
+	ChoySeePresentDonationMenu(self, anchor);
 }
 
 - (void)resetPreferences
@@ -351,7 +404,7 @@ static void choicyOpenRequestReceived(CFNotificationCenterRef center, void *obse
 		NSError *error = nil;
 		if (![[NSFileManager defaultManager] removeItemAtPath:kChoicyPrefsPlistPath error:&error]
 			&& !([error.domain isEqualToString:NSCocoaErrorDomain] && error.code == NSFileNoSuchFileError)) {
-			NSLog(@"Choicy could not reset preferences: %@", error);
+			NSLog(@"ChoySee could not reset preferences: %@", error);
 			return;
 		}
 		choicy_reloadPreferences();

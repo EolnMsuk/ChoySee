@@ -7,6 +7,30 @@
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>action</key>
+			<string>openChoySeeDeveloper</string>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>icon</key>
+			<string>GitHub</string>
+			<key>label</key>
+			<string>EolnMsuk — ChoySee developer</string>
+		</dict>
+		<dict>
+			<key>action</key>
+			<string>openChoicyDeveloper</string>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>icon</key>
+			<string>GitHub</string>
+			<key>label</key>
+			<string>opa334 — original Choicy developer</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
 			<key>footerText</key>
 			<string>No code was directly taken from the credited repos. They still helped with the development, that's why they are mentioned here.</string>
 		</dict>

@@ -5,9 +5,9 @@
 	<key>entry</key>
 	<dict>
 		<key>id</key>
-		<string>ChoicyPrefs</string>
+		<string>ChoySeePrefs</string>
 		<key>bundle</key>
-		<string>ChoicyPrefs</string>
+		<string>ChoySeePrefs</string>
 		<key>cell</key>
 		<string>PSLinkCell</string>
 		<key>detail</key>
@@ -17,7 +17,7 @@
 		<key>isController</key>
 		<true/>
 		<key>label</key>
-		<string>Choicy</string>
+		<string>ChoySee</string>
 	</dict>
 </dict>
 </plist>

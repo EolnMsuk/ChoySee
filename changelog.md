@@ -1,150 +1,143 @@
-# v1.5.5~b4
+# ChoySee changelog
 
-- App Plugin & global overwrite sorting: Apps and daemons now also sort to the top of the Applications list and display the grey status dot (when tagging is enabled) if Overwrite Global Tweak Configuration is enabled, or if an installed App Plugin uses custom rules, disabled injection, or global overwrite when the parent app has no configuration of its own.
-- Global tweak filtering: Custom lists now hide globally disabled tweaks unless the app, daemon, or plugin has Overwrite Global Tweak Configuration enabled.
-- Legacy iOS defaults: Tag Custom Apps and "Open in Choicy" Option now default to off on iOS versions older than iOS 15.
+## 1.0.0
 
-# v1.5.5~b3
+Changes since Choicy 1.5.4.
 
-- Apps and daemons with disabled tweak injection or active custom rules now sort to the top of their lists and refresh automatically when changed.
-- Added **Tag Custom Apps**, which places a small grey indicator dot on the Home Screen icons of configured apps.
-- Added **"Open in Choicy"** to the Home Screen 3D Touch / Haptic Touch menu, jumping directly to that app's Choicy settings without killing the app.
-- Updated **Choicy > App Options** to list **Tag Custom Apps**, **"Open in Choicy" Option**, **"Launch Without Tweaks" Option**, and **"Launch With Tweaks" Option** in order. On fresh installs or resets, the first two default to on while the one-time launch options default to off.
-- Improved reliability when jumping from Home Screen shortcuts into Settings, prevented duplicate menu entries, and hardened preference/list updates against crashes.
-- Added native Roothide support and updated modern Rootless and Rootful packages to target iOS 15+. Older devices (iOS 10–14) are now supported via a separate Legacy Rootful build with improved 32-bit compatibility.
+### Installation and compatibility
 
-<img width="1280" alt="Image" src="https://github.com/user-attachments/assets/33f8efd0-7bf1-478a-98e9-e8761f4a9623" />
+- Renamed the tweak and its Settings page to **ChoySee** and assigned a new package ID (`com.eolnmsuk.choysee`). Installing ChoySee in place of Choicy keeps your saved tweak rules. The package listing now credits EolnMsuk and links to the ChoySee project.
+- Added native **Roothide** support, including finding tweaks in Roothide’s own folders. The **Rootless**, **Roothide**, and **modern Rootful** packages require iOS 15 or later and have filenames that identify the jailbreak type.
+- Added a separate **Legacy Rootful** download. It targets iOS 10 or later, up from the original Rootful build’s iOS 8 target, and requires iOS 12 or later on arm64e. The legacy build also fixes a tweak-loading issue on 32-bit devices.
 
-## Overview
+#### Which package should I use?
 
-This overview covers the net changes in the forked **v1.5.5~b4** project compared to `Choicy 1.5.4`.
+Match the package to your jailbreak type, then check the iOS minimum.
 
-### Behavior and compatibility
+| Jailbreak profile | Minimum iOS | Build source | `.deb` filename |
+| --- | --- | --- | --- |
+| Rootless | iOS 15.0 | GitHub Actions | `com.eolnmsuk.choysee_1.0.0_rootless.deb` |
+| Native Roothide | iOS 15.0 | GitHub Actions | `com.eolnmsuk.choysee_1.0.0_roothide.deb` |
+| Modern Rootful | iOS 15.0 | GitHub Actions | `com.eolnmsuk.choysee_1.0.0_rootful.deb` |
+| Legacy Rootful | iOS 10.0 on `armv7` and `arm64`, iOS 12.0 on legacy `arm64e` | Local macOS build | `com.eolnmsuk.choysee_1.0.0_rootful_legacy_ios10.deb` |
 
-| Area | Current behavior compared with v1.5.4 |
-| --- | --- |
-| Applications ordering | A new alphabetical **Configured** section includes apps with disabled injection, enabled custom configuration or an active global override, either in the app or any installed App Plugin. AltList search, ordinary sections and row identities are preserved. |
-| Applications status | Keep the app's own nonempty status. Otherwise, use installed plugins with priority **Tweaks Disabled > Custom > Global Overwrite**. An override qualifies only while at least one valid tweak name is disabled globally; inactive saved lists do not qualify. |
-| Daemon ordering and previews | Configured processes appear first, including active global overrides. Daemon and individual plugin previews keep their direct-process behavior and validate dictionaries and Boolean flags. |
-| Home Screen dots | **Tag Custom Apps** adds a small grey dot at the icon's bottom-right. The app's own configured settings qualify, including an active override; installed plugins qualify through disabled injection or custom configuration. A plugin's override alone does **not** qualify the parent for a dot. |
-| Home Screen shortcuts | **Choicy Settings** opens the selected app's settings without changing its injection rules or terminating it. Both menu implementations preserve existing shortcut order, remove duplicate Choicy entries and place Settings before the applicable one-time launch option. |
-| Settings navigation | Navigation waits for menu dismissal and builds a Back path through Applications and Choicy. Separate, locked one-use requests expire after 15 seconds; newer selections supersede older requests. |
-| App Options defaults | Tag Custom Apps and Choicy Settings default to on on iOS 15+, and off on older systems. Both one-time launch options default to off. Explicit saved choices are retained; reset reloads the visible defaults immediately. |
-| Custom tweak lists | Globally disabled tweaks are hidden unless that specific app, daemon or plugin enables its own override. Saved Allow/Deny selections are retained, and lists rebuild after preference changes or returning to the page. |
-| Refresh and ownership | Preference/reset updates refresh lists and dots. Plugin ownership comes from the installed app's PlugInKit and VPN collections, with cache invalidation on app/plugin lifecycle events, Applications visits, foreground activation and icon rebinding. Uninstalled preference entries and similar bundle-ID prefixes do not establish ownership. |
+All four packages require a tweak loader that provides `mobilesubstrate`, AltList 1.0.4 or later, and PreferenceLoader.
 
-Existing preference paths, process rule keys, package identity and migration version remain compatible. The two new App Options keys control presentation; Settings navigation uses a separate request file. No preference deletion, reset or migration is required to upgrade. The injection code changes concern jailbreak paths and pointer-width compatibility; the existing one-time launch mechanism remains in place.
+### Home Screen
 
-### Expected b4 packages
+- Added **ChoySee Settings** to the Home Screen shortcut menu so you can open an app’s tweak settings directly from its icon.
+- Added **Tag Custom Apps**. A small grey dot appears at the bottom right of an app icon when the app has custom rules, has tweaks turned off, or overrides an active global rule. The dot also appears when an app extension has custom rules or tweaks turned off.
+- The new settings shortcut and icon dots are on by default on iOS 15 and later and off by default on earlier versions. Both have switches in **App Options**.
+- **Launch Without Tweaks** is now off by default. You can enable it or **Launch With Tweaks** in **App Options**.
 
-These names and requirements follow the current control files, Makefiles and package verification scripts. Modern workflow outputs go to `artifacts/`; the separately selected Legacy Rootful build writes to `artifacts/legacy/`.
+### Tweak settings
 
-| Profile | Firmware dependency | Mach-O slices | Debian architecture | Expected filename |
-| --- | --- | --- | --- | --- |
-| Rootless | `>= 15.0` | `arm64 arm64e` | `iphoneos-arm64` | `Choicy_1.5.5~b4_Rootless.deb` |
-| Native Roothide | `>= 15.0` | `arm64 arm64e` | `iphoneos-arm64e` | `Choicy_1.5.5~b4_Roothide.deb` |
-| Modern Rootful | `>= 15.0` | `arm64 arm64e` | `iphoneos-arm` | `Choicy_1.5.5~b4_Rootful.deb` |
-| Legacy Rootful | `>= 10.0` | `armv7 arm64 arm64e`; old arm64e ABI with an iOS 12.0 slice minimum | `iphoneos-arm` | `Choicy_1.5.5~b4_Rootful_Legacy_iOS10.deb` |
+- Apps with active rules appear alphabetically in a new **Configured** section at the top of **Applications**. Configured background services appear first in **Daemons**.
+- App extensions, including VPN extensions, can move their app into **Configured**. An app with no active rules of its own can show its extension’s status next to its name.
+- Tweaks disabled globally are hidden from individual **Allow** and **Deny** lists. Turn on **Overwrite Global Tweak Configuration** to see those tweaks and manage them there.
+- Settings lists, status labels, and Home Screen dots refresh after rules are saved or reset. The app list and dots also refresh when apps or extensions are installed or removed.
+- Missing or invalid saved rules fall back to defaults. On a fresh setup, saving rules for a running app closes it so the rules take effect the next time you open it.
+- Updated existing translations and troubleshooting messages for the ChoySee name and added English text for the new options. **Tweak Troubleshooting** now recognizes and skips ChoySee’s own package.
 
-All profiles retain `com.opa334.choicy` and require MobileSubstrate, AltList `>= 1.0.4` and PreferenceLoader. In v1.5.4, Rootless already targeted iOS 15.0; the other build path targeted iOS 8.0. Modern Rootful now starts at iOS 15.0, while the explicit legacy profile starts at iOS 10.0 and does not restore the iOS 8.0 target.
+### Updates, links, and donations
 
-| Build path | Toolchain and inputs | Packaging checks |
-| --- | --- | --- |
-| Modern workflow | Manual three-profile matrix on `macos-15-intel`, Xcode 16.4 and patched SDK 16.5. Pins scheme-specific Theos, AltList 1.0.11 and XPC headers; uses supplied vendored dependencies or pinned fallbacks. Compiles `gen.c` directly. | Checks b4 identity/version, firmware dependency, scheme-specific payload paths, all source localizations, exact `arm64 arm64e` slices and native Roothide linkage before labeling/uploading each artifact. Restores maintainer-script executable permissions for website uploads. |
-| Legacy Rootful | Separate prepared macOS host with Xcode 11.7, patched SDK 13.7, matching development libraries and a separate musttail-capable assembly generator. Uses the old arm64e ABI and its iOS 12.0 minimum. No legacy job is included in the modern workflow. | Preflights headers/libraries, then checks Rootful paths, root ownership, executable maintainer scripts, gzip archives, metadata, slices, deployment/SDK versions, linkage and signatures before publishing locally. |
+- Added **Updates** under **Settings → ChoySee → Other**. Tap it to compare your installed version with the latest stable release on GitHub. If a newer release is available, tap **View Release** to open its page.
+- Replaced the old source code and Mastodon links with **GitHub** for the ChoySee project and **Reddit** for EolnMsuk’s profile. The Reddit link has its own icon. **Credits** now links to EolnMsuk and original Choicy developer opa334 alongside the existing contributors.
+- Replaced the PayPal link with a **Donate** menu for Venmo and eight crypto wallets. Venmo opens in your default browser on supported versions of iOS. Each wallet shows its network and address. Tapping a wallet copies its full address and confirms the copy on screen and through VoiceOver.
 
-`release_build.sh` is a separate local helper for the three modern schemes using a prepared RootHide Theos checkout; workflow artifact verification and naming are handled by `.github/scripts/verify-package.py`.
+### Release packaging
 
-### File inventory
+- The three modern packages use a newer build setup and can be built on demand through GitHub. Package checks verify that modern and legacy downloads contain the required files and match the intended jailbreak type. The project now bundles the source for two libraries used to build it.
+- Added installation and upgrade instructions, along with screenshots of the older Settings layout.
 
-File paths are relative to the project root. Brace notation such as `Name.{c,h}` covers both named files. The grouped counts below account for every added or modified file.
+### Full file list
 
-#### Added project and build files — 8
+#### Modified in place (34)
 
-| File | Purpose |
-| --- | --- |
-| `.github/scripts/verify-package.py` | Verify b4 metadata, payload paths, slices and native Roothide linkage before naming modern artifacts. |
-| `.github/workflows/build.yml` | Provision pinned inputs, build and verify three modern schemes, and upload their packages. |
-| `ChoicyRoot.h` | Select native Roothide path mapping or the existing libroot interface. |
-| `changelog.md` | Record release notes, expected packages and the complete local v1.5.4 comparison. |
-| `control.legacy` | Define b4 Legacy Rootful metadata with an iOS 10.0 firmware requirement. |
-| `legacy_build.sh` | Validate prepared tools and explicitly clean, generate, build and package Legacy Rootful. |
-| `scripts/legacy-clang.sh` | Check the resolved SDK and apply the arm64e iOS 12.0 floor during compilation/linking. |
-| `scripts/package-legacy.py` | Preflight development inputs and package/verify the legacy Rootful stage before publication. |
+- `.gitignore`
+- `ChoicyPrefs/CHPApplicationListSubcontrollerController.m`
+- `ChoicyPrefs/CHPCreditsListController.m`
+- `ChoicyPrefs/CHPDaemonList.m`
+- `ChoicyPrefs/CHPDaemonListController.m`
+- `ChoicyPrefs/CHPListController.m`
+- `ChoicyPrefs/CHPPackageInfo.m`
+- `ChoicyPrefs/CHPPreferences.h`
+- `ChoicyPrefs/CHPProcessConfigurationListController.h`
+- `ChoicyPrefs/CHPProcessConfigurationListController.m`
+- `ChoicyPrefs/CHPRootListController.m`
+- `ChoicyPrefs/CHPTweakList.m`
+- `ChoicyPrefs/CHPTweakTroubleshootListController.m`
+- `ChoicyPrefs/entry.plist`
+- `ChoicyPrefs/Makefile`
+- `ChoicyPrefs/Resources/Credits.plist`
+- `ChoicyPrefs/Resources/Info.plist`
+- `ChoicyPrefs/Resources/Root.plist`
+- `ChoicySB/ChoicySB.h`
+- `ChoicySB/Makefile`
+- `ChoicySB/SpringBoard.h`
+- `ChoicySB/SpringBoard.x`
+- `ChoicySB/Tweak.x`
+- `control`
+- `gen.c`
+- `gen_asm.sh`
+- `Makefile`
+- `README.md`
+- `release_build.sh`
+- `Shared.h`
+- `Shared.m`
+- `Tweak.c`
+- `Tweak.s`
+- `update_localizations.sh`
 
-#### Modified files — 30
+#### Moved to `ChoySee.bundle`
 
-| File | Change |
-| --- | --- |
-| `.gitignore` | Ignore isolated legacy build artifacts. |
-| `ChoicyPrefs/CHPApplicationListSubcontrollerController.m` | Add configured-first ordering, plugin-aware status/override sorting and refreshes while preserving AltList search and navigation. |
-| `ChoicyPrefs/CHPDaemonList.m` | Use shared jailbreak paths and deliver observer enumeration/updates on the main queue. |
-| `ChoicyPrefs/CHPDaemonListController.m` | Prioritize configured processes, refresh on preference/daemon updates and clean up observers. |
-| `ChoicyPrefs/CHPListController.m` | Use validated process flags and shared active-override detection for direct previews. |
-| `ChoicyPrefs/CHPPackageInfo.m` | Use common Rootful/Rootless/Roothide path mapping for package lookup. |
-| `ChoicyPrefs/CHPPreferences.h` | Expose preference reloading to Settings controllers. |
-| `ChoicyPrefs/CHPProcessConfigurationListController.h` | Track global filtering and coalesced preference refreshes; remove the obsolete section index. |
-| `ChoicyPrefs/CHPProcessConfigurationListController.m` | Filter by each process's own override, retain saved lists and rebuild safely as settings change. |
-| `ChoicyPrefs/CHPRootListController.m` | Apply OS-dependent defaults, refresh/reset preferences immediately and route one-use requests with the correct Back stack. |
-| `ChoicyPrefs/CHPTweakList.m` | Search translated tweak directories while retaining raw Rootful and `/var/jb` fallbacks. |
-| `ChoicyPrefs/Makefile` | Link native Roothide, limit one LiteHook warning adjustment and quote staging paths. |
-| `ChoicyPrefs/Resources/Root.plist` | Identify the Applications route and add/reorder App Options, defaults and help text. |
-| `ChoicyPrefs/entry.plist` | Give PreferenceLoader a stable Choicy settings route ID. |
-| `ChoicySB/ChoicySB.h` | Expose icon-tag refreshes. |
-| `ChoicySB/Makefile` | Link UIKit/QuartzCore and native Roothide for the matching scheme. |
-| `ChoicySB/SpringBoard.h` | Declare icon lookup/layout, menu dismissal and Settings-opening interfaces. |
-| `ChoicySB/SpringBoard.x` | Add live icon dots and Choicy Settings navigation; deduplicate both shortcut menu paths and honor saved/default options. |
-| `ChoicySB/Tweak.x` | Reload safely on SpringBoard's main thread, validate app changes and refresh ownership/dots, including first writes and reset. |
-| `Makefile` | Separate modern direct-hook and legacy assembly builds, enforce targets/slices, link Roothide and isolate legacy packaging. |
-| `README.md` | Rebrand as ChoySee and document features, installation, legacy builds and credits. |
-| `Shared.h` | Declare defaults, validated configuration/ownership helpers, new presentation keys and Settings request interfaces. |
-| `Shared.m` | Validate settings, resolve/cache installed plugins, centralize defaults/configured state and lock/expire one-use navigation requests. |
-| `Tweak.c` | Use shared jailbreak paths and pointer-width-correct casts and pointer-table iteration. |
-| `Tweak.s` | Select/check only the current architecture's generated legacy assembly and reject unsupported targets. |
-| `control` | Set version 1.5.5~b4 and the modern iOS 15.0 firmware requirement. |
-| `gen.c` | Document modern direct compilation and legacy assembly generation; hook bodies are unchanged. |
-| `gen_asm.sh` | Generate all legacy slices with explicit SDK/minimums/old ABI; publish only after generation succeeds. |
-| `layout/Library/Application Support/Choicy.bundle/en.lproj/Localizable.strings` | Add English Configured, Tag Custom Apps, Choicy Settings and App Options help text. |
-| `release_build.sh` | Explicitly build Rootless, native Roothide and modern Rootful; remove the forced Xcode 11 path. |
+These files were previously under `layout/Library/Application Support/Choicy.bundle/`.
 
-#### Added vendored dependency files — 47
+**Moved and edited (9)**
 
-The v1.5.4 comparison copy contains no files in these dependency folders. Current copies include source, headers, licenses and upstream READMEs; `.gitmodules` itself is unchanged. `external/SOURCES.md` records LiteHook revision `0d9d17afc011d2a8dfe67a4f7803ff99143d0f0d` and ChOma revision `2fcc1fc51f6eb778756ccdee3c809bf83a767996`, archive hashes and the included subsets.
+- `layout/Library/Application Support/ChoySee.bundle/ar.lproj/Localizable.strings`
+- `layout/Library/Application Support/ChoySee.bundle/de.lproj/Localizable.strings`
+- `layout/Library/Application Support/ChoySee.bundle/el.lproj/Localizable.strings`
+- `layout/Library/Application Support/ChoySee.bundle/en.lproj/Localizable.strings`
+- `layout/Library/Application Support/ChoySee.bundle/he.lproj/Localizable.strings`
+- `layout/Library/Application Support/ChoySee.bundle/ru.lproj/Localizable.strings`
+- `layout/Library/Application Support/ChoySee.bundle/zh_CN.lproj/Localizable.strings`
+- `layout/Library/Application Support/ChoySee.bundle/zh_Hans.lproj/Localizable.strings`
+- `layout/Library/Application Support/ChoySee.bundle/zh_TW.lproj/Localizable.strings`
 
-| File(s) | Purpose |
-| --- | --- |
-| `external/SOURCES.md` | Record dependency provenance, archive hashes, included files and website-upload layout. |
-| `external/litehook/{LICENSE,README.md}` | Retain upstream license and usage documentation. |
-| `external/litehook/src/litehook.{c,h}` | Supply symbol lookup, function hooks and symbol rebinding. |
-| `external/litehook/external/include/{dyld_cache_format,fixup-chains}.h` | Supply dyld cache and chained-fixup structures. |
-| `external/ChOma/{LICENSE,README.md}` | Retain upstream license and usage documentation. |
-| `external/ChOma/src/Base64.{c,h}` | Base64 encoding helpers. |
-| `external/ChOma/src/BufferedStream.{c,h}` | Buffer-backed stream implementation. |
-| `external/ChOma/src/CSBlob.{c,h}` | Code-signature blob handling. |
-| `external/ChOma/src/CachePatching.h` | dyld shared-cache patch structures. |
-| `external/ChOma/src/CodeDirectory.{c,h}` | CodeDirectory parsing and hashing. |
-| `external/ChOma/src/DER.{c,h}` | DER encoding helpers. |
-| `external/ChOma/src/DyldSharedCache.{c,h}` | dyld shared-cache parsing. |
-| `external/ChOma/src/Entitlements.{c,h}` | XML and DER entitlement blobs. |
-| `external/ChOma/src/Fat.{c,h}` | Universal Mach-O slice handling. |
-| `external/ChOma/src/FileStream.{c,h}` | File-backed stream implementation. |
-| `external/ChOma/src/Host.{c,h}` | Host CPU and preferred-slice selection. |
-| `external/ChOma/src/MachO.{c,h}` | Mach-O parsing and manipulation. |
-| `external/ChOma/src/MachOByteOrder.h` | Mach-O byte-order conversions. |
-| `external/ChOma/src/MachOLoadCommand.{c,h}` | Mach-O load-command handling. |
-| `external/ChOma/src/MemoryStream.{c,h}` | Generic memory-stream interface and operations. |
-| `external/ChOma/src/PatchFinder.{c,h}` | Binary sections and pattern searches. |
-| `external/ChOma/src/PatchFinder_arm64.{c,h}` | ARM64 patch-finding helpers. |
-| `external/ChOma/src/Util.{c,h}` | Shared memory, alignment and string utilities. |
-| `external/ChOma/src/arm64.{c,h}` | ARM64 instruction helpers. |
-| `external/ChOma/src/dyld_cache_format.h` | dyld shared-cache format structures. |
-| `external/ChOma/src/fixup-chains.h` | dyld chained-fixup structures. |
+**Moved (8)**
 
-#### Added stored artifacts — 8
+- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon@2x.png`
+- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon@3x.png`
+- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon_Big@2x.png`
+- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon_Big@3x.png`
+- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon_Crossed@2x.png`
+- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon_Crossed@3x.png`
+- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon_Crossed_Big@2x.png`
+- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon_Crossed_Big@3x.png`
 
-| File(s) | Contents |
-| --- | --- |
-| `debs/Choicy_1.5.5~b3_Rootful.deb` | Stored b3 Rootful package; metadata reports `iphoneos-arm` and iOS 15.0+. |
-| `debs/Choicy_1.5.5~b3_Roothide.deb` | Stored b3 Roothide package; metadata reports `iphoneos-arm64e` and iOS 15.0+. |
-| `debs/Choicy_1.5.5~b3_Rootless.deb` | Stored b3 Rootless package; metadata reports `iphoneos-arm64` and iOS 15.0+. |
-| `screenshots/{1SS,2SS,3SS,4SS,main}.PNG` | Five project screenshots. |
+#### Added
+
+**ChoySee files**
+
+- `.github/scripts/verify-package.py`
+- `.github/workflows/build.yml`
+- `changelog.md`
+- `ChoicyPrefs/ChoySeeDonationController.h`
+- `ChoicyPrefs/ChoySeeDonationController.m`
+- `ChoicyPrefs/ChoySeeSettingsPresentation.h`
+- `ChoicyPrefs/ChoySeeUpdateChecker.h`
+- `ChoicyPrefs/ChoySeeUpdateChecker.m`
+- `ChoicyPrefs/Resources/Reddit@2x.png`
+- `ChoicyPrefs/Resources/Reddit@3x.png`
+- `ChoicyRoot.h`
+- `control.legacy`
+- `legacy_build.sh`
+- `screenshots/1SS.PNG`
+- `screenshots/2SS.PNG`
+- `screenshots/3SS.PNG`
+- `screenshots/4SS.PNG`
+- `screenshots/main.PNG`
+- `scripts/legacy-clang.sh`
+- `scripts/package-legacy.py`
+- `scripts/package_metadata.py`

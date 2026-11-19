@@ -53,7 +53,7 @@ extern NSInteger parseNumberInteger(id number, NSInteger default_);
 #define kChoicyOpenRequestLifetime 15.0
 #define kChoicyPreferencesDidReloadNotification @"ChoicyPreferencesDidReload"
 #define kChoicyApplicationPluginsDidChangeNotification @"ChoicyApplicationPluginsDidChange"
-#define kChoicyPreferencesRootID @"ChoicyPrefs"
+#define kChoicyPreferencesRootID @"ChoySeePrefs"
 #define kChoicyApplicationsSpecifierID @"Applications"
 #define kChoicyDylibName @"   Choicy"
 

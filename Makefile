@@ -2,7 +2,7 @@ CHOICY_LEGACY ?= 0
 
 ifeq ($(CHOICY_LEGACY),1)
 ifneq ($(strip $(THEOS_PACKAGE_SCHEME)),)
-$(error Legacy Choicy requires an empty THEOS_PACKAGE_SCHEME)
+$(error Legacy ChoySee requires an empty THEOS_PACKAGE_SCHEME)
 endif
 ifneq ($(filter package install do,$(MAKECMDGOALS)),)
 $(error Use sh ./legacy_build.sh to build the legacy package)
@@ -22,13 +22,13 @@ export ARCHS = armv7 arm64 arm64e
 export PREFIX = $(CHOICY_LEGACY_TOOL_PREFIX)
 export LEGACY_PREFIX LEGACY_SDKROOT
 ifneq ($(TARGET),iphone:clang:13.7:10.0)
-$(error Legacy Choicy requires TARGET=iphone:clang:13.7:10.0)
+$(error Legacy ChoySee requires TARGET=iphone:clang:13.7:10.0)
 endif
 ifneq ($(strip $(ARCHS)),armv7 arm64 arm64e)
-$(error Legacy Choicy requires ARCHS='armv7 arm64 arm64e')
+$(error Legacy ChoySee requires ARCHS='armv7 arm64 arm64e')
 endif
 ifneq ($(PREFIX),$(CHOICY_LEGACY_TOOL_PREFIX))
-$(error Legacy Choicy requires the compiler prefix prepared by legacy_build.sh)
+$(error Legacy ChoySee requires the compiler prefix prepared by legacy_build.sh)
 endif
 choicy_hook_source := Tweak.s
 else ifeq ($(CHOICY_LEGACY),0)
