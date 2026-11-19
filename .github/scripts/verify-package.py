@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify one fresh CI package before assigning its downloadable filename."""
+"""Verify one fresh modern package before assigning its downloadable filename."""
 
 import argparse
 import io
@@ -7,7 +7,16 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tarfile
+import tempfile
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from package_metadata import (DYLIBS, IDENTITY, IMAGES, PREFS_INFO, PROJECT, modern_metadata, release_filename,
+                              required_payload, verify_bundle_metadata, verify_dependencies, verify_metadata)
+
+
+ARCHITECTURES = {"rootless": "iphoneos-arm64", "roothide": "iphoneos-arm64e", "rootful": "iphoneos-arm"}
 
 
 def output(*command):
@@ -16,48 +25,35 @@ def output(*command):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--label", required=True, choices=("Rootless", "Roothide", "Rootful"))
-    parser.add_argument("--architecture", required=True)
+    parser.add_argument("--label", required=True, type=str.lower, choices=ARCHITECTURES)
+    parser.add_argument("--architecture")
+    parser.add_argument("--package-dir", type=Path, default=PROJECT / "packages")
     args = parser.parse_args()
-    architectures = {"Rootless": "iphoneos-arm64", "Roothide": "iphoneos-arm64e", "Rootful": "iphoneos-arm"}
-    if args.architecture != architectures[args.label]:
+    profile = args.label
+    architecture = ARCHITECTURES[profile]
+    if args.architecture is not None and args.architecture != architecture:
         raise SystemExit("Label and expected architecture disagree")
-    packages = list(Path("packages").glob("*.deb"))
+    packages = list(args.package_dir.glob("*.deb"))
     if len(packages) != 1:
         raise SystemExit(f"Expected exactly one fresh .deb; found {len(packages)}")
     package = packages[0]
-    metadata = {key: output("dpkg-deb", "-f", str(package), key) for key in ("Package", "Version", "Architecture")}
-    expected = {"Package": "com.opa334.choicy", "Version": "1.5.5~b4", "Architecture": args.architecture}
-    if metadata != expected:
-        raise SystemExit(f"Unexpected package metadata: {metadata!r}; expected {expected!r}")
-    minimum_ios = "15.0"
-    dependencies = {dependency.strip() for dependency in output("dpkg-deb", "-f", str(package), "Depends").split(",")}
-    if f"firmware (>= {minimum_ios})" not in dependencies:
-        raise SystemExit(f"Missing firmware requirement for iOS {minimum_ios}: {dependencies!r}")
+    fields = (*IDENTITY, "Version", "Architecture", "Depends")
+    metadata = {key: output("dpkg-deb", "-f", str(package), key) for key in fields}
+    verify_metadata(metadata, architecture, modern_metadata()["Version"])
+    verify_dependencies(metadata, "15.0", allow_additional=True)
 
-    review = Path(".ci")
-    review.mkdir(exist_ok=True)
     listing = output("dpkg-deb", "-c", str(package))
-    (review / f"payload-{args.label}.txt").write_text(listing + "\n", encoding="utf-8")
+    github_output = os.environ.get("GITHUB_OUTPUT")
+    if github_output:
+        review = PROJECT / ".ci"
+        review.mkdir(exist_ok=True)
+        (review / f"payload-{profile}.txt").write_text(listing + "\n", encoding="utf-8")
+
     payload = subprocess.check_output(["dpkg-deb", "--fsys-tarfile", str(package)])
-    prefix = "var/jb/" if args.label == "Rootless" else ""
-    required = [
-        "Library/MobileSubstrate/DynamicLibraries/   Choicy.dylib",
-        "Library/MobileSubstrate/DynamicLibraries/   Choicy.plist",
-        "Library/MobileSubstrate/DynamicLibraries/ChoicySB.dylib",
-        "Library/MobileSubstrate/DynamicLibraries/ChoicySB.plist",
-        "Library/PreferenceBundles/ChoicyPrefs.bundle/ChoicyPrefs",
-        "Library/PreferenceBundles/ChoicyPrefs.bundle/Info.plist",
-        "Library/PreferenceBundles/ChoicyPrefs.bundle/Root.plist",
-        "Library/PreferenceLoader/Preferences/ChoicyPrefs.plist",
-    ]
-    localizations = sorted(Path("layout/Library/Application Support/Choicy.bundle").glob("*.lproj/Localizable.strings"))
-    if not localizations:
-        raise SystemExit("No source localizations found")
-    required.extend(path.relative_to("layout").as_posix() for path in localizations)
-    with tarfile.open(fileobj=io.BytesIO(payload), mode="r:") as archive:
+    prefix = "var/jb/" if profile == "rootless" else ""
+    with tarfile.open(fileobj=io.BytesIO(payload), mode="r:") as archive, tempfile.TemporaryDirectory() as scratch:
         members = {member.name.removeprefix("./").rstrip("/"): member for member in archive.getmembers()}
-        for relative in required:
+        for relative in required_payload():
             name = prefix + relative
             member = members.get(name)
             if member is None or not member.isfile() or not member.size:
@@ -68,27 +64,32 @@ def main():
             alternate = relative if prefix else "var/jb/" + relative
             if alternate in members:
                 raise SystemExit(f"Unexpected payload for another package scheme: /{alternate}")
-        for relative in (required[0], required[2], required[4]):
-            image = review / (Path(relative).name.strip() + ".verify")
+        for suffix in ("dylib", "plist"):
+            if prefix + f"{DYLIBS}/Choicy.{suffix}" in members:
+                raise SystemExit("Choicy staged without the three-space load-order prefix")
+        verify_bundle_metadata(archive.extractfile(members[prefix + PREFS_INFO]).read(), metadata["Version"])
+        for relative in IMAGES:
+            image = Path(scratch) / Path(relative).name.strip()
             image.write_bytes(archive.extractfile(members[prefix + relative]).read())
-            try:
-                slices = set(output("lipo", "-archs", str(image)).split())
-                if slices != {"arm64", "arm64e"}:
-                    raise SystemExit(f"Unexpected Mach-O architectures in {relative}: {sorted(slices)!r}")
-                if args.label == "Roothide":
-                    # Native RootHide stages at /Library and links via .jbroot.
-                    dependencies = output("otool", "-L", str(image))
-                    if ".jbroot/" not in dependencies or "libroothide.dylib" not in dependencies:
-                        raise SystemExit(f"Missing native RootHide linkage in {relative}:\n{dependencies}")
-            finally:
-                image.unlink()
+            slices = set(output("lipo", "-archs", str(image)).split())
+            if slices != {"arm64", "arm64e"}:
+                raise SystemExit(f"Unexpected Mach-O architectures in {relative}: {sorted(slices)!r}")
+            if profile == "roothide":
+                # Native RootHide stages at /Library and links via .jbroot.
+                dependencies = output("otool", "-L", str(image))
+                if ".jbroot/" not in dependencies or "libroothide.dylib" not in dependencies:
+                    raise SystemExit(f"Missing native RootHide linkage in {relative}:\n{dependencies}")
 
-    artifacts = Path("artifacts")
+    artifacts = PROJECT / "artifacts"
     artifacts.mkdir(exist_ok=True)
-    destination = artifacts / f"Choicy_{metadata['Version']}_{args.label}.deb"
-    shutil.copy2(package, destination)
-    with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as stream:
-        stream.write(f"version={metadata['Version']}\npath={destination.as_posix()}\n")
+    destination = artifacts / release_filename(metadata, profile)
+    with tempfile.TemporaryDirectory(prefix=".verified-", dir=artifacts) as scratch:
+        verified = Path(scratch) / destination.name
+        shutil.copy2(package, verified)
+        os.replace(verified, destination)
+    if github_output:
+        with open(github_output, "a", encoding="utf-8") as stream:
+            stream.write(f"path={destination.relative_to(PROJECT).as_posix()}\nstem={destination.stem}\n")
     print(f"Verified {metadata['Package']} {metadata['Version']} {metadata['Architecture']}: {destination}")
 
 
