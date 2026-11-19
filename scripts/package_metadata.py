@@ -15,7 +15,7 @@ IDENTITY = {
     "Replaces": "com.opa334.choicy",
     "Homepage": "https://github.com/EolnMsuk/ChoySee/",
 }
-RUNTIME_DEPENDENCIES = {"mobilesubstrate", "com.opa334.altlist (>=1.0.4)", "preferenceloader"}
+RUNTIME_DEPENDENCIES = {"mobilesubstrate", "com.opa334.altlist (>= 1.0.4)", "preferenceloader"}
 DYLIBS = "Library/MobileSubstrate/DynamicLibraries"
 PREFS = "Library/PreferenceBundles/ChoySeePrefs.bundle"
 PREFS_INFO = f"{PREFS}/Info.plist"
@@ -27,11 +27,19 @@ def require(condition, message):
         raise SystemExit(message)
 
 
+def dependency_entries(value):
+    # Packaging tools can rewrite whitespace around version constraints.
+    versioned = r"^([^\s()]+)\s*\(\s*(<<|<=|=|>=|>>)\s*([^\s()]+)\s*\)$"
+    return [re.sub(versioned, r"\1 (\2 \3)", entry.strip()) for entry in value.split(",")]
+
+
 def control_fields(control):
     fields = {}
     for line in control.splitlines():
         key, separator, value = line.partition(":")
         require(separator and key not in fields, f"Invalid control field: {line!r}")
+        if key == "Depends":
+            value = ", ".join(dependency_entries(value))
         fields[key] = value.strip()
     return fields
 
@@ -43,7 +51,7 @@ def verify_metadata(fields, architecture, version):
 
 
 def verify_dependencies(fields, minimum_ios, *, allow_additional=False):
-    dependencies = [entry.strip() for entry in fields.get("Depends", "").split(",")]
+    dependencies = dependency_entries(fields.get("Depends", ""))
     expected = RUNTIME_DEPENDENCIES | {f"firmware (>= {minimum_ios})"}
     require(expected.issubset(dependencies) and (allow_additional or len(dependencies) == len(expected)),
             f"Unexpected iOS {minimum_ios} dependencies: {dependencies!r}")
