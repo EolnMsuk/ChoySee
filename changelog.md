@@ -1,5 +1,11 @@
 # ChoySee changelog
 
+## 2.0.1
+
+- Aligned the five OTHER titles on one leading edge and centered each title vertically in its row. Moved the Updates glyph into the shared icon column.
+- Matched NetShield2's white-backed GitHub mark and orange Donate coin. Donate uses the `dollarsign.circle.fill` system symbol on iOS 13 and later, with a bundled orange coin for iOS 10-12 and whenever the symbol is unavailable.
+- Shortened the root footer to one line reading `ChoySee by EolnMsuk`.
+
 ## 2.0.0
 
 Changes since Choicy 1.5.4.

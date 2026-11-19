@@ -22,6 +22,7 @@
 #import "../Shared.h"
 #import "CHPDaemonList.h"
 #import "CHPTweakList.h"
+#import <UIKit/UIKit.h>
 #import <mach-o/dyld.h>
 #import "CHPPreferences.h"
 #import "CHPApplicationListSubcontrollerController.h"
@@ -152,6 +153,52 @@ NSString *getInjectionPlatform()
 @end
 
 static NSString *const ChoySeeUpdatesSpecifierID = @"CheckUpdates";
+static NSString *const ChoySeeDonateSpecifierID = @"Donate";
+
+static UIImage *ChoySeeRenderRowIcon(CGSize imageSize, void (^draw)(CGRect))
+{
+	CGSize canvasSize = CGSizeMake(29, 29);
+	CGRect bounds = CGRectMake((canvasSize.width - imageSize.width) / 2,
+		(canvasSize.height - imageSize.height) / 2, imageSize.width, imageSize.height);
+	UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:canvasSize];
+	UIImage *image = [renderer imageWithActions:^(UIGraphicsImageRendererContext *context) {
+		draw(bounds);
+	}];
+	return [image imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+}
+
+static UIImage *ChoySeeUpdatesIcon(void)
+{
+	static UIImage *icon;
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		NSAttributedString *emoji = [[NSAttributedString alloc] initWithString:@"🔄"
+			attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:20]}];
+		icon = ChoySeeRenderRowIcon(emoji.size, ^(CGRect bounds) {
+			[emoji drawAtPoint:bounds.origin];
+		});
+	});
+	return icon;
+}
+
+static UIImage *ChoySeeDonateIcon(UITraitCollection *traits)
+{
+	if (@available(iOS 13.0, *)) {
+		UIImageSymbolConfiguration *configuration = [UIImageSymbolConfiguration configurationWithPointSize:22];
+		UIImage *coin = [UIImage systemImageNamed:@"dollarsign.circle.fill" withConfiguration:configuration];
+		if (coin) {
+			UIColor *orange = [UIColor.systemOrangeColor resolvedColorWithTraitCollection:traits];
+			UIImage *tintedCoin = [coin imageWithTintColor:orange renderingMode:UIImageRenderingModeAlwaysOriginal];
+			return ChoySeeRenderRowIcon(tintedCoin.size, ^(CGRect bounds) {
+				[tintedCoin drawInRect:bounds];
+			});
+		}
+	}
+
+	NSBundle *bundle = [NSBundle bundleForClass:CHPRootListController.class];
+	UIImage *fallback = [UIImage imageNamed:@"Donate" inBundle:bundle compatibleWithTraitCollection:traits];
+	return [fallback imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+}
 
 static void choicyOpenRequestReceived(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
 {
@@ -172,11 +219,26 @@ static void choicyOpenRequestReceived(CFNotificationCenterRef center, void *obse
 				[specifier setProperty:@(choicyAppOptionsDefaultEnabled()) forKey:@"default"];
 			}
 			if ([specifier.identifier isEqualToString:ChoySeeUpdatesSpecifierID]) {
+				[specifier setProperty:ChoySeeUpdatesIcon() forKey:@"iconImage"];
 				[specifier setProperty:@(!self.updateCheckInProgress) forKey:@"enabled"];
+			} else if ([specifier.identifier isEqualToString:ChoySeeDonateSpecifierID]) {
+				[specifier setProperty:ChoySeeDonateIcon(self.traitCollection) forKey:@"iconImage"];
 			}
 		}
 	}
 	return specifiers;
+}
+
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
+{
+	[super traitCollectionDidChange:previousTraitCollection];
+	if (@available(iOS 13.0, *)) {
+		if (_specifiers && [self.traitCollection hasDifferentColorAppearanceComparedToTraitCollection:previousTraitCollection]) {
+			PSSpecifier *row = [self specifierForID:ChoySeeDonateSpecifierID];
+			[row setProperty:ChoySeeDonateIcon(self.traitCollection) forKey:@"iconImage"];
+			if (row && self.isViewLoaded) [self reloadSpecifier:row];
+		}
+	}
 }
 
 - (id)readPreferenceValue:(PSSpecifier *)specifier
@@ -390,7 +452,7 @@ static void choicyOpenRequestReceived(CFNotificationCenterRef center, void *obse
 
 - (void)presentDonationMenu
 {
-	PSSpecifier *row = [self specifierForID:@"Donate"];
+	PSSpecifier *row = [self specifierForID:ChoySeeDonateSpecifierID];
 	NSIndexPath *path = row ? [self indexPathForSpecifier:row] : nil;
 	UIView *anchor = path ? [self.table cellForRowAtIndexPath:path] : nil;
 	ChoySeePresentDonationMenu(self, anchor);

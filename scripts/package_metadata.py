@@ -102,6 +102,8 @@ def required_payload():
         f"{PREFS}/Reddit@3x.png",
         f"{PREFS}/GitHub@2x.png",
         f"{PREFS}/GitHub@3x.png",
+        f"{PREFS}/Donate@2x.png",
+        f"{PREFS}/Donate@3x.png",
         f"{PREFS}/Credits@2x.png",
         f"{PREFS}/Credits@3x.png",
         "Library/PreferenceLoader/Preferences/ChoySeePrefs.plist",
