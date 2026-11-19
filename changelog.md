@@ -1,6 +1,6 @@
 # ChoySee changelog
 
-## 1.0.0
+## 2.0.0
 
 Changes since Choicy 1.5.4.
 
@@ -16,10 +16,10 @@ Match the package to your jailbreak type, then check the iOS minimum.
 
 | Jailbreak profile | Minimum iOS | Build source | `.deb` filename |
 | --- | --- | --- | --- |
-| Rootless | iOS 15.0 | GitHub Actions | `com.eolnmsuk.choysee_1.0.0_rootless.deb` |
-| Native Roothide | iOS 15.0 | GitHub Actions | `com.eolnmsuk.choysee_1.0.0_roothide.deb` |
-| Modern Rootful | iOS 15.0 | GitHub Actions | `com.eolnmsuk.choysee_1.0.0_rootful.deb` |
-| Legacy Rootful | iOS 10.0 on `armv7` and `arm64`, iOS 12.0 on legacy `arm64e` | Local macOS build | `com.eolnmsuk.choysee_1.0.0_rootful_legacy_ios10.deb` |
+| Rootless | iOS 15.0 | GitHub Actions | `com.eolnmsuk.choysee_2.0.0_rootless.deb` |
+| Native Roothide | iOS 15.0 | GitHub Actions | `com.eolnmsuk.choysee_2.0.0_roothide.deb` |
+| Modern Rootful | iOS 15.0 | GitHub Actions | `com.eolnmsuk.choysee_2.0.0_rootful.deb` |
+| Legacy Rootful | iOS 10.0 on `armv7` and `arm64`, iOS 12.0 on legacy `arm64e` | Local macOS build | `com.eolnmsuk.choysee_2.0.0_rootful_legacy_ios10.deb` |
 
 All four packages require a tweak loader that provides `mobilesubstrate`, AltList 1.0.4 or later, and PreferenceLoader.
 
