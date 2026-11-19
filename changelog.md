@@ -1,5 +1,9 @@
 # ChoySee changelog
 
+## 2.0.2
+
+- Changed the Donate title in OTHER to iOS system green.
+
 ## 2.0.1
 
 - Aligned the five OTHER titles on one leading edge and centered each title vertically in its row. Moved the Updates glyph into the shared icon column.

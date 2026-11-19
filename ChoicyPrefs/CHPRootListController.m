@@ -22,6 +22,7 @@
 #import "../Shared.h"
 #import "CHPDaemonList.h"
 #import "CHPTweakList.h"
+#import <Preferences/PSTableCell.h>
 #import <UIKit/UIKit.h>
 #import <mach-o/dyld.h>
 #import "CHPPreferences.h"
@@ -206,6 +207,21 @@ static void choicyOpenRequestReceived(CFNotificationCenterRef center, void *obse
 	dispatch_async(dispatch_get_main_queue(), ^{ [controller choicy_schedulePendingApplicationSettings]; });
 }
 
+@interface CHPDonateTableCell : PSTableCell
+@end
+
+@implementation CHPDonateTableCell
+
+- (void)layoutSubviews
+{
+	[super layoutSubviews];
+	UIColor *green = UIColor.systemGreenColor;
+	self.textLabel.textColor = green;
+	self.textLabel.highlightedTextColor = green;
+}
+
+@end
+
 @implementation CHPRootListController
 
 - (NSMutableArray *)specifiers
@@ -222,6 +238,7 @@ static void choicyOpenRequestReceived(CFNotificationCenterRef center, void *obse
 				[specifier setProperty:ChoySeeUpdatesIcon() forKey:@"iconImage"];
 				[specifier setProperty:@(!self.updateCheckInProgress) forKey:@"enabled"];
 			} else if ([specifier.identifier isEqualToString:ChoySeeDonateSpecifierID]) {
+				[specifier setProperty:[CHPDonateTableCell class] forKey:@"cellClass"];
 				[specifier setProperty:ChoySeeDonateIcon(self.traitCollection) forKey:@"iconImage"];
 			}
 		}

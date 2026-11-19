@@ -22,10 +22,10 @@ Download the file for your jailbreak environment from the [latest ChoySee releas
 
 | Profile | Firmware dependency | Filename |
 | --- | --- | --- |
-| Rootless | iOS 15.0+ | `com.eolnmsuk.choysee_2.0.1_rootless.deb` |
-| Native Roothide | iOS 15.0+ | `com.eolnmsuk.choysee_2.0.1_roothide.deb` |
-| Modern Rootful | iOS 15.0+ | `com.eolnmsuk.choysee_2.0.1_rootful.deb` |
-| Legacy Rootful | iOS 10.0+ | `com.eolnmsuk.choysee_2.0.1_rootful_legacy_ios10.deb` |
+| Rootless | iOS 15.0+ | `com.eolnmsuk.choysee_2.0.2_rootless.deb` |
+| Native Roothide | iOS 15.0+ | `com.eolnmsuk.choysee_2.0.2_roothide.deb` |
+| Modern Rootful | iOS 15.0+ | `com.eolnmsuk.choysee_2.0.2_rootful.deb` |
+| Legacy Rootful | iOS 10.0+ | `com.eolnmsuk.choysee_2.0.2_rootful_legacy_ios10.deb` |
 
 ## Build profiles
 
