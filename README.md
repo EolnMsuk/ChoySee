@@ -4,8 +4,6 @@ ChoySee is EolnMsuk’s fork of opa334’s Choicy for configuring tweak injectio
 
 ---
 
-*Historical screenshots of the Choicy-branded Settings interface.*
-
 <img width="4773" height="2589" alt="Historical screenshots of the Choicy Settings interface" src="https://github.com/user-attachments/assets/e191b5bd-8d7b-4108-bde1-971d11b46af4" />
 
 ## Features
