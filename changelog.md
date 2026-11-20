@@ -1,156 +1,29 @@
-# ChoySee changelog
+# ChoySee 2.0.4
 
-## 2.0.4
+ChoySee is a continuation of Choicy 1.5.4 with support for modern jailbreaks, new Home Screen shortcuts, and an updated Settings layout. Installing ChoySee over Choicy automatically keeps all of your existing app and tweak settings.
 
-- Added a Sileo package listing with the ChoySee icon, a header banner, and six screenshots you can swipe through horizontally. The Changelog tab includes the full release history.
+### Compatibility & Installation
 
-## 2.0.3
+* **Modern Jailbreaks (iOS 15+):** Added native **Roothide** support alongside **Rootless** and **Modern Rootful** builds.
+* **Older Devices (iOS 10–14):** Added a **Legacy Rootful** build (requires iOS 10+ on `armv7`/`arm64`, or iOS 12+ on `arm64e`), which also fixes tweak-loading issues on 32-bit devices.
+* **Requirements:** Requires a tweak loader (`mobilesubstrate`), AltList 1.0.4 or later, and PreferenceLoader.
+* **Sileo Listing:** Added an official Sileo package page featuring a header banner, swipeable screenshots, and full release notes.
 
-- Replaced the attribution below Reset Preferences with a centered footer showing the installed ChoySee version, the device’s iOS version, and the jailbreak environment.
+### Home Screen Features
 
-## 2.0.2
+* **Quick Settings Shortcut:** Press and hold any app icon to open **ChoySee Settings** directly for that app (enabled by default on iOS 15+; toggleable in **App Options**).
+* **Custom App Dots:** Added **Tag Custom Apps**, which places a small grey dot on the bottom-right corner of an app icon whenever that app or its extensions have custom rules or disabled tweaks (enabled by default on iOS 15+; toggleable in **App Options**).
+* **Launch Options:** **Launch Without Tweaks** is now off by default, and can be enabled alongside **Launch With Tweaks** inside **App Options**.
 
-- Changed the Donate title in OTHER to iOS system green.
+### Tweak Settings & Organization
 
-## 2.0.1
+* **Configured Sections:** Apps and background daemons with active rules now appear in a **Configured** section at the top of their respective lists. Apps will also move to **Configured** if one of their extensions (such as a VPN extension) has custom rules.
+* **Cleaner Tweak Lists:** Tweaks that are disabled globally are now hidden from individual app **Allow** and **Deny** lists unless you enable **Overwrite Global Tweak Configuration**.
+* **Automatic Refreshing:** App lists, status labels, and Home Screen dots update automatically whenever you change rules, reset settings, or install/remove apps. Saving rules on a fresh setup will automatically close the target app so changes apply on the next launch.
+* **Better Troubleshooting:** **Tweak Troubleshooting** now safely ignores ChoySee itself, and missing or corrupted rule files automatically fall back to safe defaults.
 
-- Aligned the five OTHER titles on one leading edge and centered each title vertically in its row. Moved the Updates glyph into the shared icon column.
-- Matched NetShield2's white-backed GitHub mark and orange Donate coin. Donate uses the `dollarsign.circle.fill` system symbol on iOS 13 and later, with a bundled orange coin for iOS 10-12 and whenever the symbol is unavailable.
-- Shortened the root footer to one line reading `ChoySee by EolnMsuk`.
+### Settings Layout, Updates & Links
 
-## 2.0.0
-
-Changes since Choicy 1.5.4.
-
-### Installation and compatibility
-
-- Renamed the tweak and its Settings page to **ChoySee** and assigned a new package ID (`com.eolnmsuk.choysee`). Installing ChoySee in place of Choicy keeps your saved tweak rules. The package listing now credits EolnMsuk and links to the ChoySee project.
-- Added native **Roothide** support, including finding tweaks in Roothide’s own folders. The **Rootless**, **Roothide**, and **modern Rootful** packages require iOS 15 or later and have filenames that identify the jailbreak type.
-- Added a separate **Legacy Rootful** download. It targets iOS 10 or later, up from the original Rootful build’s iOS 8 target, and requires iOS 12 or later on arm64e. The legacy build also fixes a tweak-loading issue on 32-bit devices.
-
-#### Which package should I use?
-
-Match the package to your jailbreak type, then check the iOS minimum.
-
-| Jailbreak profile | Minimum iOS | Build source | `.deb` filename |
-| --- | --- | --- | --- |
-| Rootless | iOS 15.0 | GitHub Actions | `com.eolnmsuk.choysee_2.0.0_rootless.deb` |
-| Native Roothide | iOS 15.0 | GitHub Actions | `com.eolnmsuk.choysee_2.0.0_roothide.deb` |
-| Modern Rootful | iOS 15.0 | GitHub Actions | `com.eolnmsuk.choysee_2.0.0_rootful.deb` |
-| Legacy Rootful | iOS 10.0 on `armv7` and `arm64`, iOS 12.0 on legacy `arm64e` | Local macOS build | `com.eolnmsuk.choysee_2.0.0_rootful_legacy_ios10.deb` |
-
-All four packages require a tweak loader that provides `mobilesubstrate`, AltList 1.0.4 or later, and PreferenceLoader.
-
-### Home Screen
-
-- Added **ChoySee Settings** to the Home Screen shortcut menu so you can open an app’s tweak settings directly from its icon.
-- Added **Tag Custom Apps**. A small grey dot appears at the bottom right of an app icon when the app has custom rules, has tweaks turned off, or overrides an active global rule. The dot also appears when an app extension has custom rules or tweaks turned off.
-- The new settings shortcut and icon dots are on by default on iOS 15 and later and off by default on earlier versions. Both have switches in **App Options**.
-- **Launch Without Tweaks** is now off by default. You can enable it or **Launch With Tweaks** in **App Options**.
-
-### Tweak settings
-
-- Apps with active rules appear alphabetically in a new **Configured** section at the top of **Applications**. Configured background services appear first in **Daemons**.
-- App extensions, including VPN extensions, can move their app into **Configured**. An app with no active rules of its own can show its extension’s status next to its name.
-- Tweaks disabled globally are hidden from individual **Allow** and **Deny** lists. Turn on **Overwrite Global Tweak Configuration** to see those tweaks and manage them there.
-- Settings lists, status labels, and Home Screen dots refresh after rules are saved or reset. The app list and dots also refresh when apps or extensions are installed or removed.
-- Missing or invalid saved rules fall back to defaults. On a fresh setup, saving rules for a running app closes it so the rules take effect the next time you open it.
-- Updated existing translations and troubleshooting messages for the ChoySee name and added English text for the new options. **Tweak Troubleshooting** now recognizes and skips ChoySee’s own package.
-
-### Updates, links, and donations
-
-- Added **Updates** under **Settings → ChoySee → Other**. Tap it to compare your installed version with the latest stable release on GitHub. If a newer release is available, tap **View Release** to open its page.
-- Replaced the old source code and Mastodon links with **GitHub** for the ChoySee project and **Reddit** for EolnMsuk’s profile. The Reddit link has its own icon. **Credits** now links to EolnMsuk and original Choicy developer opa334 alongside the existing contributors.
-- Replaced the PayPal link with a **Donate** menu for Venmo and eight crypto wallets. Venmo opens in your default browser on supported versions of iOS. Each wallet shows its network and address. Tapping a wallet copies its full address and confirms the copy on screen and through VoiceOver.
-
-### Release packaging
-
-- The three modern packages use a newer build setup and can be built on demand through GitHub. Package checks verify that modern and legacy downloads contain the required files and match the intended jailbreak type. The project now bundles the source for two libraries used to build it.
-- Added installation and upgrade instructions, along with screenshots of the older Settings layout.
-
-### Full file list
-
-#### Modified in place
-
-- `.gitignore`
-- `ChoicyPrefs/CHPApplicationListSubcontrollerController.m`
-- `ChoicyPrefs/CHPCreditsListController.m`
-- `ChoicyPrefs/CHPDaemonList.m`
-- `ChoicyPrefs/CHPDaemonListController.m`
-- `ChoicyPrefs/CHPListController.m`
-- `ChoicyPrefs/CHPPackageInfo.m`
-- `ChoicyPrefs/CHPPreferences.h`
-- `ChoicyPrefs/CHPProcessConfigurationListController.h`
-- `ChoicyPrefs/CHPProcessConfigurationListController.m`
-- `ChoicyPrefs/CHPRootListController.m`
-- `ChoicyPrefs/CHPTweakList.m`
-- `ChoicyPrefs/CHPTweakTroubleshootListController.m`
-- `ChoicyPrefs/entry.plist`
-- `ChoicyPrefs/Makefile`
-- `ChoicyPrefs/Resources/Credits.plist`
-- `ChoicyPrefs/Resources/Info.plist`
-- `ChoicyPrefs/Resources/Root.plist`
-- `ChoicySB/ChoicySB.h`
-- `ChoicySB/Makefile`
-- `ChoicySB/SpringBoard.h`
-- `ChoicySB/SpringBoard.x`
-- `ChoicySB/Tweak.x`
-- `control`
-- `gen.c`
-- `gen_asm.sh`
-- `Makefile`
-- `README.md`
-- `release_build.sh`
-- `Shared.h`
-- `Shared.m`
-- `Tweak.c`
-- `Tweak.s`
-- `update_localizations.sh`
-
-#### Moved to `ChoySee.bundle`
-
-These files were previously under `layout/Library/Application Support/Choicy.bundle/`.
-
-**Moved and edited**
-
-- `layout/Library/Application Support/ChoySee.bundle/ar.lproj/Localizable.strings`
-- `layout/Library/Application Support/ChoySee.bundle/de.lproj/Localizable.strings`
-- `layout/Library/Application Support/ChoySee.bundle/el.lproj/Localizable.strings`
-- `layout/Library/Application Support/ChoySee.bundle/en.lproj/Localizable.strings`
-- `layout/Library/Application Support/ChoySee.bundle/he.lproj/Localizable.strings`
-- `layout/Library/Application Support/ChoySee.bundle/ru.lproj/Localizable.strings`
-- `layout/Library/Application Support/ChoySee.bundle/zh_CN.lproj/Localizable.strings`
-- `layout/Library/Application Support/ChoySee.bundle/zh_Hans.lproj/Localizable.strings`
-- `layout/Library/Application Support/ChoySee.bundle/zh_TW.lproj/Localizable.strings`
-
-**Moved**
-
-- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon@2x.png`
-- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon@3x.png`
-- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon_Big@2x.png`
-- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon_Big@3x.png`
-- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon_Crossed@2x.png`
-- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon_Crossed@3x.png`
-- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon_Crossed_Big@2x.png`
-- `layout/Library/Application Support/ChoySee.bundle/AppLaunchIcon_Crossed_Big@3x.png`
-
-#### Added
-
-**ChoySee files**
-
-- `.github/scripts/verify-package.py`
-- `.github/workflows/build.yml`
-- `changelog.md`
-- `ChoicyPrefs/ChoySeeDonationController.h`
-- `ChoicyPrefs/ChoySeeDonationController.m`
-- `ChoicyPrefs/ChoySeeSettingsPresentation.h`
-- `ChoicyPrefs/ChoySeeUpdateChecker.h`
-- `ChoicyPrefs/ChoySeeUpdateChecker.m`
-- `ChoicyPrefs/Resources/Reddit@2x.png`
-- `ChoicyPrefs/Resources/Reddit@3x.png`
-- `ChoicyRoot.h`
-- `control.legacy`
-- `legacy_build.sh`
-- `scripts/legacy-clang.sh`
-- `scripts/package-legacy.py`
-- `scripts/package_metadata.py`
+* **In-App Update Checker:** Added an **Updates** button under **Settings → ChoySee → Other** to check for newer releases on GitHub.
+* **Refreshed Menu & Footer:** Aligned icons and labels in the **Other** section, updated the **Donate** menu (supporting Venmo and one-tap copy for eight crypto wallets), and added a footer displaying your installed ChoySee version, iOS version, and jailbreak type.
+* **Updated Links & Credits:** Added links to the ChoySee GitHub repository, EolnMsuk’s Reddit profile, and credits for both EolnMsuk and original Choicy developer opa334.
