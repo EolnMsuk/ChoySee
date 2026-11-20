@@ -1,5 +1,9 @@
 # ChoySee changelog
 
+## 2.0.4
+
+- Added a Sileo package listing with the ChoySee icon, a header banner, and six screenshots you can swipe through horizontally. The Changelog tab includes the full release history.
+
 ## 2.0.3
 
 - Replaced the attribution below Reset Preferences with a centered footer showing the installed ChoySee version, the device’s iOS version, and the jailbreak environment.
