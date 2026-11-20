@@ -25,6 +25,7 @@
 #import <Preferences/PSTableCell.h>
 #import <UIKit/UIKit.h>
 #import <mach-o/dyld.h>
+#import <string.h>
 #import "CHPPreferences.h"
 #import "CHPApplicationListSubcontrollerController.h"
 #import "CHPProcessConfigurationListController.h"
@@ -155,6 +156,35 @@ NSString *getInjectionPlatform()
 
 static NSString *const ChoySeeUpdatesSpecifierID = @"CheckUpdates";
 static NSString *const ChoySeeDonateSpecifierID = @"Donate";
+
+static NSString *ChoySeeInstalledVersion(void)
+{
+	return [[NSBundle bundleForClass:CHPRootListController.class]
+		objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+}
+
+static NSString *ChoySeeJailbreakEnvironment(void)
+{
+#ifdef THEOS_PACKAGE_SCHEME_ROOTHIDE
+	return @"RootHide";
+#else
+	NSFileManager *fileManager = NSFileManager.defaultManager;
+	// Older RootHide installations can also have a /var/jb directory.
+	if ([fileManager fileExistsAtPath:@"/var/jb/.installed_roothide"]) {
+		return @"RootHide";
+	}
+	for (uint32_t i = 0; i < _dyld_image_count(); i++) {
+		const char *name = _dyld_get_image_name(i);
+		if (name && strstr(name, "roothide")) {
+			return @"RootHide";
+		}
+	}
+	if ([fileManager fileExistsAtPath:@"/var/jb"]) {
+		return @"Rootless";
+	}
+	return @"Rootful";
+#endif
+}
 
 static UIImage *ChoySeeRenderRowIcon(CGSize imageSize, void (^draw)(CGRect))
 {
@@ -442,8 +472,7 @@ static void choicyOpenRequestReceived(CFNotificationCenterRef center, void *obse
 	self.updateCheckInProgress = YES;
 	self.showUpdateResult = YES;
 
-	NSString *version = [[NSBundle bundleForClass:CHPRootListController.class]
-		objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+	NSString *version = ChoySeeInstalledVersion();
 	__weak CHPRootListController *weakSelf = self;
 	[ChoySeeUpdateChecker checkInstalledVersion:version completion:^(NSString *tag, NSURL *url, NSString *failure) {
 		CHPRootListController *controller = weakSelf;
@@ -557,9 +586,38 @@ void presentNotLoadingFirstWarning(PSListController *plc, BOOL showDontShowAgain
 	}
 }
 
+- (UIView *)buildFooterView
+{
+	NSString *version = ChoySeeInstalledVersion();
+	UILabel *label = [[UILabel alloc] init];
+	label.text = [NSString stringWithFormat:@"ChoySee v%@ (iOS %@ %@)",
+		version.length ? version : @"?", UIDevice.currentDevice.systemVersion, ChoySeeJailbreakEnvironment()];
+	label.textAlignment = NSTextAlignmentCenter;
+	label.font = [UIFont systemFontOfSize:12.0 weight:UIFontWeightRegular];
+	if (@available(iOS 13.0, *)) {
+		label.textColor = UIColor.secondaryLabelColor;
+	} else {
+		label.textColor = UIColor.darkGrayColor;
+	}
+	label.numberOfLines = 1;
+	label.translatesAutoresizingMaskIntoConstraints = NO;
+
+	UIView *container = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.table.bounds), 44.0)];
+	container.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+	[container addSubview:label];
+	[NSLayoutConstraint activateConstraints:@[
+		[label.centerXAnchor constraintEqualToAnchor:container.centerXAnchor],
+		[label.centerYAnchor constraintEqualToAnchor:container.centerYAnchor],
+		[label.leadingAnchor constraintGreaterThanOrEqualToAnchor:container.leadingAnchor constant:16.0],
+		[label.trailingAnchor constraintLessThanOrEqualToAnchor:container.trailingAnchor constant:-16.0],
+	]];
+	return container;
+}
+
 - (void)viewDidLoad
 {
 	[super viewDidLoad];
+	self.table.tableFooterView = [self buildFooterView];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(choicy_applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge void *)self, choicyOpenRequestReceived, kChoicyOpenRequestNotification, NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
 

@@ -1,5 +1,9 @@
 # ChoySee changelog
 
+## 2.0.3
+
+- Replaced the attribution below Reset Preferences with a centered footer showing the installed ChoySee version, the device’s iOS version, and the jailbreak environment.
+
 ## 2.0.2
 
 - Changed the Donate title in OTHER to iOS system green.
