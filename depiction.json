@@ -1,7 +1,7 @@
 {
   "class": "DepictionTabView",
   "minVersion": "0.4",
-  "headerImage": "https://raw.githubusercontent.com/EolnMsuk/ChoySee/refs/heads/master/ChoicyPrefs/Resources/banner.png",
+  "headerImage": "https://raw.githubusercontent.com/EolnMsuk/ChoySee/refs/heads/master/ChoicyPrefs/Resources/banner1.png",
   "tabs": [
     {
       "class": "DepictionStackView",

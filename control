@@ -10,5 +10,6 @@ Conflicts: com.opa334.choicy
 Replaces: com.opa334.choicy
 Homepage: https://github.com/EolnMsuk/ChoySee/
 Icon: https://raw.githubusercontent.com/EolnMsuk/ChoySee/refs/heads/master/ChoicyPrefs/Resources/ChoicyIcon@3x.png
+Header: https://raw.githubusercontent.com/EolnMsuk/ChoySee/refs/heads/master/ChoicyPrefs/Resources/banner.png
 SileoDepiction: https://raw.githubusercontent.com/EolnMsuk/ChoySee/refs/heads/master/depiction.json
 Section: Tweaks
