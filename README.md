@@ -1,6 +1,6 @@
 # ChoySee
 
-ChoySee is EolnMsuk’s fork of opa334’s Choicy for configuring tweak injection on jailbroken iOS.
+ChoySee, a fork of opa334’s Choicy for configuring tweak injection on jailbroken iOS.
 
 ---
 
