@@ -1,7 +1,7 @@
 Package: com.eolnmsuk.choysee
 Name: ChoySee
 Depends: firmware (>= 10.0), mobilesubstrate, com.opa334.altlist (>=1.0.4), preferenceloader
-Version: 2.0.4
+Version: 2.0.5
 Architecture: iphoneos-arm
 Description: Advanced tweak configuration. EolnMsuk's fork of opa334's Choicy for Legacy Rootful on iOS 10.0 and later.
 Maintainer: EolnMsuk
