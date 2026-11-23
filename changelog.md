@@ -1,8 +1,12 @@
-# ChoySee 2.0.5
+# 2.0.6
 
-The only change in this release is a refreshed banner image on the ChoySee package page in Sileo.
+- Updated depiction.json / Sileo description of ChoySee.
 
-# ChoySee 2.0.4
+# 2.0.5
+
+- Refreshed banner image on the ChoySee package page in Sileo.
+
+# 2.0.4
 
 ChoySee is a continuation of Choicy 1.5.4 with support for modern jailbreaks, new Home Screen shortcuts, and an updated Settings layout. Installing ChoySee over Choicy automatically keeps all of your existing app and tweak settings.
 
