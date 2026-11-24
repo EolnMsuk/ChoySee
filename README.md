@@ -47,5 +47,5 @@ sh ./legacy_build.sh
 
 ## Credits
 
-- EolnMsuk ChoySee. [EolnMsuk on GitHub](https://github.com/EolnMsuk)
-- opa334 Choicy. [Original Choicy repository](https://github.com/opa334/Choicy)
+- EolnMsuk ChoySee - [EolnMsuk on GitHub](https://github.com/EolnMsuk)
+- opa334 Choicy - [Original Choicy repository](https://github.com/opa334/Choicy)
