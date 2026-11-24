@@ -14,7 +14,7 @@ ChoySee, a fork of opa334’s Choicy for configuring tweak injection on jailbrok
 - Configure each tweak dylib individually for every process
 - Disable tweaks globally (with the ability to set exceptions for individual processes)
 - Option for an application shortcut to launch the application with or without tweaks once
-- **NEW:** Open an app’s injection settings from its **ChoySee Settings** Home Screen shortcut.
+- **NEW:** Open an app’s injection settings from its **ChoySee** Home Screen shortcut.
 - **NEW:** Mark any apps with custom rules or disabled injection with a grey dot on their icons.
 - **NEW:** Show configured apps and daemons first in their respective lists.
 
