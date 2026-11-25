@@ -5,7 +5,8 @@ ChoySee, a fork of opa334’s Choicy for configuring tweak injection on jailbrok
 ---
 
 <img width="1280" alt="banner" src="https://github.com/user-attachments/assets/2eca8ceb-7b1b-4285-931a-0e92441be0a2" />
-<img width="1280" alt="main" src="https://github.com/user-attachments/assets/93fa46f4-f919-401e-b8cc-eaf0ec2e8dad" />
+<img width="1280" alt="ChoySee (2)" src="https://github.com/user-attachments/assets/4212527a-5a71-4eb8-ad17-40fb13195d95" />
+
 
 
 ## Features
