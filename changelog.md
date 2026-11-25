@@ -1,3 +1,8 @@
+# 2.0.7
+
+- Shortened the app icon shortcut name to **ChoySee**.
+- Updated the **"ChoySee" Option** label and description in **App Options** to match.
+
 # 2.0.6
 
 - Updated depiction.json / Sileo description of ChoySee.
@@ -19,7 +24,7 @@ ChoySee is a continuation of Choicy 1.5.4 with support for modern jailbreaks, ne
 
 ### Home Screen Features
 
-* **Quick Settings Shortcut:** Press and hold any app icon to open **ChoySee Settings** directly for that app (enabled by default on iOS 15+; toggleable in **App Options**).
+* **Quick Settings Shortcut:** Press and hold any app icon to open **ChoySee** directly for that app (enabled by default on iOS 15+; toggleable in **App Options**).
 * **Custom App Dots:** Added **Tag Custom Apps**, which places a small grey dot on the bottom-right corner of an app icon whenever that app or its extensions have custom rules or disabled tweaks (enabled by default on iOS 15+; toggleable in **App Options**).
 * **Launch Options:** **Launch Without Tweaks** is now off by default, and can be enabled alongside **Launch With Tweaks** inside **App Options**.
 
